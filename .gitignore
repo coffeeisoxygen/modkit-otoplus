@@ -1,0 +1,57 @@
+# Python bytecode and cache
+__pycache__/
+*.py[oc]
+
+# Build artifacts
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Test and cache folders
+.pytest_cache/
+.ruff_cache/
+
+# IDE/editor settings
+.vscode/
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# Streamlit and logs
+.streamlit/
+*.log
+*.logs
+logs/
+
+# Database and data files
+*.db
+*.sqlite
+*.dbml
+*.env
+user_info.json
+data/
+backup/
+
+# Reports and sample folders
+.reports/
+.reports/allure/
+./sample/
+temp/sample/
+
+# Version file
+src/_version.py
+
+# Development notes and instructions
+.notes/
+*.instructions.md
+*.prompt.md
+*.chatmode.md
+
+# OS-specific files
+.DS_Store
+Thumbs.db
