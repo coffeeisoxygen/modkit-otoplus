@@ -129,6 +129,7 @@ omit = [
     "*/signature_bootstrap.py",
     "src/__init__.py",
     "src/_version.py",
+    "*.pyi",
 ]
 
 [tool.coverage.report]
