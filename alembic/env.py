@@ -9,7 +9,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "s
 
 # Import engine & model
 from src.backend.db import engine
-from src.backend.models.member import Member # noqa: F401
+# Import semua model otomatis (penting!)
+import src.backend.models  # noqa: F401
 from sqlmodel import SQLModel
 
 config = context.config
