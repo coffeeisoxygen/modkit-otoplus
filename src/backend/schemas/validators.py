@@ -2,7 +2,7 @@ import ipaddress
 
 from pydantic import AnyHttpUrl
 
-from src.backend.models.exception import (
+from src.backend.schemas.exception import (
     IPAddressValidationError,
     NameValidationError,
     PasswordValidationError,

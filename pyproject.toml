@@ -8,7 +8,6 @@ dependencies = [
     "alembic>=1.16.4",
     "fastapi[all]>=0.116.1",
     "loguru>=0.7.3",
-    "sqlmodel>=0.0.24",
     "streamlit>=1.46.1",
 ]
 
@@ -203,9 +202,3 @@ name = "ruff"
 type = "module"
 module = "ruff"
 options = "check --fix REVISION_SCRIPT_FILENAME"
-
-[[tool.alembic.post_write_hooks]]
-name = "replace_autostring"
-type = "exec"
-executable = "python"
-options = "scripts/fix_autostring.py REVISION_SCRIPT_FILENAME"

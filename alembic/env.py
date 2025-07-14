@@ -7,18 +7,18 @@ from alembic import context
 # Setup path biar bisa import dari src/
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-# Import engine & model
-from src.backend.db import engine
-# Import semua model otomatis (penting!)
+# Import engine & Base
+from src.backend.config.database import engine
+from src.backend.models.md_base import Base
+# Import semua model (pastikan semua file model di-import di sini)
 import src.backend.models  # noqa: F401
-from sqlmodel import SQLModel
 
 config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Metadata buat autogenerate
-target_metadata = SQLModel.metadata
+# Metadata untuk autogenerate
+target_metadata = Base.metadata
 
 
 def run_migrations_offline():

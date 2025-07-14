@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 
 from src._version import __version__ as version
+from src.backend.api.v1.member import router as member_router
 from src.mlog.cst_logging import logger, patch_uvicorn_loggers, setup_logging
 
 # Load .env
@@ -17,7 +18,7 @@ version = version.split(" ")[0]
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):  # noqa: RUF029
+async def lifespan(app: FastAPI):
     """Application lifespan events (startup/shutdown)."""
     logger.info("Starting application...")
     yield
@@ -30,7 +31,7 @@ app = FastAPI(
     description="This is a sample FastAPI application.",
     version=version,
 )
-
+app.include_router(member_router)
 
 @app.get("/")
 async def read_root():

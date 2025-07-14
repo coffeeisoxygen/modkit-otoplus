@@ -1,13 +1,14 @@
 """Database engine, session, and initialization logic."""
 
 import os
-from contextlib import contextmanager
 from typing import Annotated
 
 from dotenv import load_dotenv
 from fastapi import Depends
-from sqlalchemy.orm import sessionmaker
-from sqlmodel import Session, SQLModel, create_engine
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, sessionmaker
+
+from src.backend.models.md_base import Base  # Ganti ini, jangan deklarasi ulang!
 
 # --- Load env ---
 load_dotenv(dotenv_path=".env")
@@ -28,9 +29,9 @@ engine = create_engine(
 # --- Session (for scripts / Streamlit) ---
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-
 # --- Session (for FastAPI via Depends) ---
-@contextmanager
+
+
 def get_session():
     """Get a new database session.
 
@@ -40,8 +41,11 @@ def get_session():
     Yields:
         Session: A new SQLAlchemy database session.
     """
-    with Session(engine) as session:
-        yield session
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 DBSession = Annotated[Session, Depends(get_session)]
@@ -50,7 +54,7 @@ DBSession = Annotated[Session, Depends(get_session)]
 # --- Dev-only Init ---
 def create_database_and_tables():
     """Create DB & tables — dev only."""
-    SQLModel.metadata.create_all(engine)
+    Base.metadata.create_all(engine)
 
 
 # Example usage for Streamlit/scripts:

@@ -1,18 +1,18 @@
 from fastapi import APIRouter, HTTPException
-from src.backend.db import DBSession
-from src.backend.models.member import Member, MemberCreate, MemberUpdate
-from src.backend.services import member_service  # nama sesuai struktur lo
+from src.backend.config.database import DBSession
+from src.backend.schemas.sc_member import MemberCreate, MemberUpdate, MemberRead
+from src.backend.services import member_service
 
 router = APIRouter(prefix="/v1/members", tags=["Members"])
 
 
-@router.get("/", response_model=list[Member])
+@router.get("/", response_model=list[MemberRead])
 def list_members(session: DBSession, skip: int = 0, limit: int = 100):
     """List members with pagination."""
     return member_service.list_members(session, skip, limit)
 
 
-@router.get("/{member_id}", response_model=Member)
+@router.get("/{member_id}", response_model=MemberRead)
 def get_member_by_id(member_id: int, session: DBSession):
     """Get Member by ID."""
     member = member_service.get_by_id(session, member_id)
@@ -21,7 +21,7 @@ def get_member_by_id(member_id: int, session: DBSession):
     return member
 
 
-@router.post("/", response_model=Member)
+@router.post("/", response_model=MemberRead)
 def create_member(data: MemberCreate, session: DBSession):
     """Create a new member.
 
@@ -37,7 +37,7 @@ def create_member(data: MemberCreate, session: DBSession):
     return member_service.create_member(session, data)
 
 
-@router.put("/{member_id}", response_model=Member)
+@router.put("/{member_id}", response_model=MemberRead)
 def update_member(member_id: int, data: MemberUpdate, session: DBSession):
     """Update an existing member by ID."""
     member = member_service.update_member(session, member_id, data)
