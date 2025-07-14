@@ -2,7 +2,7 @@ import json
 
 from sqlmodel import Session, select
 
-from src.backend.mcache.factory import get_cache
+from src.backend.mcache.factory import CACHE_TTL, _cache_key, get_cache
 from src.backend.mcache.inmemory import InMemoryCacheBackend
 from src.backend.models.member import Member, MemberCreate, MemberUpdate
 from src.mlog.cst_logging import logger
@@ -25,7 +25,7 @@ def get_by_id(session: Session, member_id: int) -> Member | None:
         Member | None: The fetched member or None if not found.
     """
     logger.debug(f"Fetching member by id: {member_id}")
-    key = f"member:id:{member_id}"
+    key = _cache_key("member", id=member_id)
     cached_json = cache.get(key)
     if cached_json:
         logger.debug(f"Cache hit for member id: {member_id}")
@@ -33,7 +33,7 @@ def get_by_id(session: Session, member_id: int) -> Member | None:
     member = session.get(Member, member_id)
     if member:
         logger.debug(f"Member found in DB for id: {member_id}, caching result")
-        cache.set(key, member.model_dump_json())
+        cache.set(key, member.model_dump_json(), ttl=CACHE_TTL)
     else:
         logger.debug(f"No member found in DB for id: {member_id}")
     return member
@@ -54,7 +54,7 @@ def get_by_ip(session: Session, ip: str) -> Member | None:
         Member | None: The fetched member or None if not found.
     """
     logger.debug(f"Fetching member by ip: {ip}")
-    key = f"member:ip:{ip}"
+    key = _cache_key("member", ip=ip)
     cached_json = cache.get(key)
     if cached_json:
         logger.debug(f"Cache hit for member ip: {ip}")
@@ -62,7 +62,7 @@ def get_by_ip(session: Session, ip: str) -> Member | None:
     member = session.exec(select(Member).where(Member.ipaddress == ip)).first()
     if member:
         logger.debug(f"Member found in DB for ip: {ip}, caching result")
-        cache.set(key, member.model_dump_json())
+        cache.set(key, member.model_dump_json(), ttl=CACHE_TTL)
     else:
         logger.debug(f"No member found in DB for ip: {ip}")
     return member
@@ -83,7 +83,7 @@ def get_by_name(session: Session, name: str) -> Member | None:
         Member | None: The fetched member or None if not found.
     """
     logger.debug(f"Fetching member by name: {name}")
-    key = f"member:name:{name}"
+    key = _cache_key("member", name=name)
     cached_json = cache.get(key)
     if cached_json:
         logger.debug(f"Cache hit for member name: {name}")
@@ -91,7 +91,7 @@ def get_by_name(session: Session, name: str) -> Member | None:
     member = session.exec(select(Member).where(Member.name == name)).first()
     if member:
         logger.debug(f"Member found in DB for name: {name}, caching result")
-        cache.set(key, member.model_dump_json())
+        cache.set(key, member.model_dump_json(), ttl=CACHE_TTL)
     else:
         logger.debug(f"No member found in DB for name: {name}")
     return member
@@ -155,7 +155,7 @@ def delete_member(session: Session, member_id: int) -> bool:
 def list_members(session: Session, skip: int = 0, limit: int = 100) -> list[Member]:
     """List members with pagination and caching."""
     logger.debug(f"Listing members with skip: {skip}, limit: {limit}")
-    key = f"members:list:skip:{skip}:limit:{limit}"
+    key = _cache_key("members:list", skip=skip, limit=limit)
     cached_json = cache.get(key)
     if cached_json:
         logger.debug("Cache hit for member list")
@@ -163,7 +163,11 @@ def list_members(session: Session, skip: int = 0, limit: int = 100) -> list[Memb
     members = session.exec(select(Member).offset(skip).limit(limit)).all()
     if members:
         logger.debug(f"Members found in DB, caching result with count: {len(members)}")
-        cache.set(key, json.dumps([json.loads(m.model_dump_json()) for m in members]))
+        cache.set(
+            key,
+            json.dumps([json.loads(m.model_dump_json()) for m in members]),
+            ttl=CACHE_TTL,
+        )
     else:
         logger.debug("No members found in DB for listing")
     return list(members)

@@ -28,18 +28,30 @@ engine = create_engine(
 # --- Session (for scripts / Streamlit) ---
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+
 # --- Session (for FastAPI via Depends) ---
 @contextmanager
 def get_session():
+    """Get a new database session.
+
+    This function provides a new SQLAlchemy database session for each request.
+    It ensures that the session is properly closed after use.
+
+    Yields:
+        Session: A new SQLAlchemy database session.
+    """
     with Session(engine) as session:
         yield session
 
+
 DBSession = Annotated[Session, Depends(get_session)]
+
 
 # --- Dev-only Init ---
 def create_database_and_tables():
     """Create DB & tables — dev only."""
     SQLModel.metadata.create_all(engine)
+
 
 # Example usage for Streamlit/scripts:
 # with SessionLocal() as session:

@@ -21,9 +21,9 @@ class InMemoryCacheBackend(BaseCacheBackend):
     def get(self, key: str) -> str | None:
         return self.cache.get(key)
 
-    def set(self, key: str, value: str, ttl: int = 60):
-        # TTL per-item: pakai .set() method
-        self.cache.set(key, value, ttl=ttl)  # type: ignore
+    def set(self, key: str, value: str, ttl: int = 60):  # noqa: ARG002
+        """Set a value in the cache. TTL is ignored for in-memory backend."""
+        self.cache[key] = value  # TTL per-item is not supported in cachetools <5.0
 
     def delete(self, key: str):
         self.cache.pop(key, None)

@@ -39,3 +39,8 @@ def get_cache() -> InMemoryCacheBackend:
         raise NotImplementedError("Redis cache backend not implemented yet.")
     else:
         raise NotImplementedError(f"Cache backend '{CACHE_SERVICE}' not supported.")
+
+
+def _cache_key(prefix: str, **kwargs) -> str:
+    parts = [f"{prefix}:{k}:{v}" for k, v in kwargs.items()]
+    return ":".join(parts)
