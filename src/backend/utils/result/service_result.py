@@ -40,10 +40,13 @@ def caller_info() -> str:
     return f"{info.filename}:{info.function}:{info.lineno}"
 
 
-def handle_result(result: ServiceResult):
+def handle_result(result: ServiceResult, log_success: bool = False):
     if not result.success:
         with result as exception:
             logger.error(f"{exception} | caller={caller_info()}")
             raise exception
-    with result as result_value:
-        return result_value
+    else:
+        if log_success:
+            logger.info(f"Success result from {caller_info()}")
+        with result as result_value:
+            return result_value
