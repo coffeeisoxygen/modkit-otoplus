@@ -36,7 +36,10 @@ LOG_TO_FILE = os.getenv("LOG_TO_FILE", "true").lower() in ("1", "true", "yes")
 LOG_PATH = os.getenv("LOG_PATH", "logs")
 LOG_NAME_PREFIX = os.getenv("LOG_NAME_PREFIX", "app")
 LOG_SIZE_MB = int(os.getenv("LOG_SIZE_MB", "10")) * 1_000_000
-LOG_RETENTION_DAYS = os.getenv("LOG_RETENTION_DAYS", "7d")
+LOG_RETENTION_DAYS = os.getenv("LOG_RETENTION_DAYS", "7")
+LOG_RETENTION = f"{LOG_RETENTION_DAYS} days"
+LOG_SHOW_THREAD = os.getenv("LOG_SHOW_THREAD", "false").lower() in ("1", "true", "yes")
+LOG_SHOW_TIME = os.getenv("LOG_SHOW_TIME", "true").lower() in ("1", "true", "yes")
 
 
 # === ROTATOR ===
@@ -68,9 +71,27 @@ FORMAT_STR = (
     "<level>{level: <8}</level> {time:YYYY-MM-DD HH:mm:ss} | "
     "<cyan>{process.name}:{thread.name}</cyan> | "
     "<magenta>{name}:{function}:{line}</magenta> | "
-    "<yellow>{extra[ip]:<15}</yellow> | "
     "<level>{message}</level>"
 )
+
+
+def cli_format(
+    record: Any, show_thread: bool = LOG_SHOW_THREAD, show_time: bool = LOG_SHOW_TIME
+) -> str:
+    """Safely format log record, matching FORMAT_STR, with options to show thread and time."""
+    parts = []
+    parts.append(f"<level>{record['level'].name:<8}</level>")
+    if show_time:
+        parts.append(f"{record['time']:YYYY-MM-DD HH:mm:ss}")
+    if show_thread:
+        parts.append(f"<cyan>{record['process'].name}:{record['thread'].name}</cyan>")
+    else:
+        parts.append(f"<cyan>{record['process'].name}</cyan>")
+    parts.append(
+        f"<magenta>{record['name']}:{record['function']}:{record['line']}</magenta>"
+    )
+    parts.append(f"<level>{record['message']}</level>")
+    return " | ".join(parts) + "\n"
 
 
 # === SETUP ===
@@ -87,7 +108,9 @@ def setup_logging():
         loguru_logger.add(
             sys.stderr,
             level=LOG_LEVEL,
-            format=FORMAT_STR,
+            format=lambda record: cli_format(
+                record, show_thread=LOG_SHOW_THREAD, show_time=LOG_SHOW_TIME
+            ),
             colorize=True,
             backtrace=True,
             diagnose=LOG_DIAGNOSE,
@@ -106,7 +129,7 @@ def setup_logging():
             backtrace=True,
             enqueue=LOG_ENQUEUE,
             rotation=rotator.should_rotate,
-            retention=LOG_RETENTION_DAYS,
+            retention=LOG_RETENTION,
             opener=opener,
         )
 
@@ -119,7 +142,7 @@ def setup_logging():
             backtrace=True,
             enqueue=LOG_ENQUEUE,
             rotation=rotator.should_rotate,
-            retention=LOG_RETENTION_DAYS,
+            retention=LOG_RETENTION,
             opener=opener,
         )
 
@@ -248,6 +271,7 @@ logger = loguru_logger
 
 __all__ = [
     "LogContext",
+    "Rotator",
     "log_with_stacktrace",
     "logger",
     "logger_wraps",

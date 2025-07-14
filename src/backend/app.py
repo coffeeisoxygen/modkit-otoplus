@@ -1,23 +1,23 @@
 from contextlib import asynccontextmanager
 
+import uvicorn
 from fastapi import FastAPI
 
-from mlog.cst_logging import patch_uvicorn_loggers, setup_logging
 from src._version import __version__ as version
+from src.mlog.cst_logging import logger, patch_uvicorn_loggers, setup_logging
 
-# Ensure logging is set up before using the middleware
+# Setup logging before anything else
 setup_logging()
 patch_uvicorn_loggers()
-
 version = version.split(" ")[0]  # Extract the version number only
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
-    # e.g., connect to database, initialize resources
+async def lifespan(app: FastAPI):  # noqa: RUF029
+    """Application lifespan events."""
+    logger.info("Starting application...")
     yield
-    # Shutdown logic here
-    # e.g., close database connections, cleanup
+    logger.info("Shutting down application...")
 
 
 app = FastAPI(
@@ -26,3 +26,13 @@ app = FastAPI(
     description="This is a sample FastAPI application.",
     version=version,
 )
+
+
+@app.get("/")
+async def read_root():
+    logger.info("Hello endpoint accessed")
+    return {"Hello": "World"}
+
+
+if __name__ == "__main__":
+    uvicorn.run("src.backend.app:app", host="0.0.0.0", port=8000, reload=True)
