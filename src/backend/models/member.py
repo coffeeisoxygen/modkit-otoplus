@@ -1,4 +1,7 @@
-"""Member model for database and API."""
+"""Member model for database and API.
+
+using pydantic & SQLModel
+"""
 
 from datetime import datetime
 
