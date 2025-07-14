@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from src._version import __version__ as version
 from src.backend.api.v1.member import router as member_router
 from src.mlog.cst_logging import logger, patch_uvicorn_loggers, setup_logging
-
+from src.backend.api.v1.user import router as user_router
 # Load .env
 load_dotenv()
 
@@ -32,7 +32,7 @@ app = FastAPI(
     version=version,
 )
 app.include_router(member_router)
-
+app.include_router(user_router)
 @app.get("/")
 async def read_root():
     """Root endpoint."""

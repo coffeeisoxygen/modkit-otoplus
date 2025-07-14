@@ -2,9 +2,10 @@
 
 from datetime import datetime
 
-from src.backend.config.database import Base
 from sqlalchemy import Boolean, DateTime, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
+
+from src.backend.config.database import Base
 
 
 class User(Base):
@@ -21,7 +22,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(
         String(100), unique=True, index=True, nullable=False
     )
-    password_hash: Mapped[str] = mapped_column(String(100), nullable=False)
+    password: Mapped[str] = mapped_column(String(100), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(

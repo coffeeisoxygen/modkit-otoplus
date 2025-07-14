@@ -1,9 +1,11 @@
-from src.backend.schemas.sc_user import UserCreate, UserUpdate
-from src.backend.models.md_user import User
-from src.backend.utils.result.service_result import ServiceResult
-from src.backend.utils.exceptions.app_exceptions import AppException
-from src.backend.services.base import AppService, AppCRUD
 from sqlalchemy.exc import SQLAlchemyError
+
+from src.backend.models.md_user import User
+from src.backend.schemas.sc_user import UserCreate, UserUpdate
+from src.backend.services.base import AppCRUD, AppService
+from src.backend.utils.exceptions.app_exceptions import AppException
+from src.backend.utils.result.service_result import ServiceResult
+from src.backend.utils.security import hash_password
 
 
 class UserCRUD(AppCRUD):
@@ -14,14 +16,20 @@ class UserCRUD(AppCRUD):
         return self.db.query(User).filter(User.username == username).first()
 
     def create(self, data: UserCreate) -> User:
-        user = User(**data.model_dump(exclude={"password_confirm"}))
+        user_data = data.model_dump(exclude={"password_confirm"})
+        if "password" in user_data:
+            user_data["password"] = hash_password(user_data["password"])
+        user = User(**user_data)
         self.db.add(user)
         self.db.commit()
         self.db.refresh(user)
         return user
 
     def update(self, user: User, data: UserUpdate) -> User:
-        for key, value in data.model_dump(exclude_unset=True).items():
+        update_data = data.model_dump(exclude_unset=True)
+        if "password" in update_data:
+            update_data["password"] = hash_password(update_data["password"])
+        for key, value in update_data.items():
             setattr(user, key, value)
         self.db.commit()
         self.db.refresh(user)
@@ -30,6 +38,7 @@ class UserCRUD(AppCRUD):
     def delete(self, user: User) -> None:
         self.db.delete(user)
         self.db.commit()
+        return None
 
 
 class UserService(AppService):

@@ -35,6 +35,26 @@ class AppException:
             AppExceptionError.__init__(
                 self, status_code, context or {"message": "Username cannot be empty"}
             )
+    class PasswordHashValidationError(AppExceptionError):
+        """Exception raised for errors in the password hash validation."""
+
+        def __init__(self, context: dict | None = None):
+            status_code = 422
+            AppExceptionError.__init__(
+                self,
+                status_code,
+                context or {"message": "Password hash must be a valid hash."},
+            )
+    class PasswordConfirmValidationError(AppExceptionError):
+        """Exception raised for errors in the password confirmation validation."""
+
+        def __init__(self, context: dict | None = None):
+            status_code = 422
+            AppExceptionError.__init__(
+                self,
+                status_code,
+                context or {"message": "Password confirmation does not match."},
+            )
 
     class PinValidationError(AppExceptionError):
         """Exception raised for errors in the pin validation."""

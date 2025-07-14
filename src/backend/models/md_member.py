@@ -2,9 +2,10 @@
 
 from datetime import datetime
 
-from src.backend.config.database import Base
 from sqlalchemy import Boolean, DateTime, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
+
+from src.backend.config.database import Base
 
 
 class Member(Base):
@@ -21,9 +22,7 @@ class Member(Base):
     pin: Mapped[str] = mapped_column(String(10), nullable=False)
     password: Mapped[str] = mapped_column(String(10), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    allow_no_sign: Mapped[bool] = mapped_column(
-        Boolean, default=False, nullable=False
-    )
+    allow_no_sign: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now, nullable=False
     )

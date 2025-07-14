@@ -1,9 +1,21 @@
 """User schemas."""
 
 from datetime import datetime
-from pydantic import BaseModel, EmailStr, Field, ConfigDict, field_validator, model_validator
 
-from src.backend.utils.validator.user_validator import validate_password, validate_username
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    Field,
+    field_validator,
+    model_validator,
+)
+
+from src.backend.utils.exceptions import app_exceptions
+from src.backend.utils.validator.user_validator import (
+    validate_password,
+    validate_username,
+)
 
 
 class UserBase(BaseModel):
@@ -14,9 +26,7 @@ class UserBase(BaseModel):
     is_active: bool = True
     is_superuser: bool = False
 
-    model_config = ConfigDict(
-        str_strip_whitespace=True,
-    )
+    model_config = ConfigDict(str_strip_whitespace=True)
 
     @field_validator("username")
     @classmethod
@@ -38,7 +48,7 @@ class UserCreate(UserBase):
     @model_validator(mode="after")
     def check_passwords_match(self) -> "UserCreate":
         if self.password != self.password_confirm:
-            raise ValueError("Passwords do not match")
+            raise app_exceptions.AppException.PasswordConfirmValidationError()
         return self
 
 
@@ -51,9 +61,7 @@ class UserUpdate(BaseModel):
     is_superuser: bool | None = None
     password: str | None = Field(default=None, min_length=8)
 
-    model_config = ConfigDict(
-        str_strip_whitespace=True
-    )
+    model_config = ConfigDict(str_strip_whitespace=True)
 
     @field_validator("username")
     @classmethod

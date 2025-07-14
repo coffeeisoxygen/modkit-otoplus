@@ -1,11 +1,12 @@
 import json
-from sqlalchemy.orm import Session
+
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from src.backend.mcache.factory import CACHE_TTL, _cache_key, get_cache
 from src.backend.mcache.inmemory import InMemoryCacheBackend
 from src.backend.models.md_member import Member
-from src.backend.schemas.sc_member import MemberCreate, MemberUpdate, MemberRead
+from src.backend.schemas.sc_member import MemberCreate, MemberRead, MemberUpdate
 from src.mlog.cst_logging import logger
 
 cache: InMemoryCacheBackend = get_cache()
@@ -60,7 +61,9 @@ def get_by_ip(session: Session, ip: str) -> MemberRead | None:
     if cached_json:
         logger.debug(f"Cache hit for member ip: {ip}")
         return MemberRead.model_validate(json.loads(cached_json))
-    member = session.execute(select(Member).where(Member.ipaddress == ip)).scalar_one_or_none()
+    member = session.execute(
+        select(Member).where(Member.ipaddress == ip)
+    ).scalar_one_or_none()
     if member:
         logger.debug(f"Member found in DB for ip: {ip}, caching result")
         cache.set(key, member_to_json(member), ttl=CACHE_TTL)
@@ -89,7 +92,9 @@ def get_by_name(session: Session, name: str) -> MemberRead | None:
     if cached_json:
         logger.debug(f"Cache hit for member name: {name}")
         return MemberRead.model_validate(json.loads(cached_json))
-    member = session.execute(select(Member).where(Member.name == name)).scalar_one_or_none()
+    member = session.execute(
+        select(Member).where(Member.name == name)
+    ).scalar_one_or_none()
     if member:
         logger.debug(f"Member found in DB for name: {name}, caching result")
         cache.set(key, member_to_json(member), ttl=CACHE_TTL)
@@ -110,7 +115,9 @@ def create_member(session: Session, data: MemberCreate) -> MemberRead:
     return MemberRead.model_validate(member)
 
 
-def update_member(session: Session, member_id: int, data: MemberUpdate) -> MemberRead | None:
+def update_member(
+    session: Session, member_id: int, data: MemberUpdate
+) -> MemberRead | None:
     """Get a member by their ID and update their information."""
     logger.info(f"Updating member id: {member_id} with data: {data}")
     member = session.get(Member, member_id)
@@ -159,11 +166,7 @@ def list_members(session: Session, skip: int = 0, limit: int = 100) -> list[Memb
     members = session.execute(select(Member).offset(skip).limit(limit)).scalars().all()
     if members:
         logger.debug(f"Members found in DB, caching result with count: {len(members)}")
-        cache.set(
-            key,
-            json.dumps([member_to_dict(m) for m in members]),
-            ttl=CACHE_TTL,
-        )
+        cache.set(key, json.dumps([member_to_dict(m) for m in members]), ttl=CACHE_TTL)
     else:
         logger.debug("No members found in DB for listing")
     return [MemberRead.model_validate(m) for m in members]
@@ -184,5 +187,7 @@ def member_to_dict(member: Member) -> dict:
         "pin": member.pin,
         "password": member.password,
         "is_active": member.is_active,
-        "created_at": member.created_at.isoformat() if getattr(member, "created_at", None) is not None else None,
+        "created_at": member.created_at.isoformat()
+        if getattr(member, "created_at", None) is not None
+        else None,
     }

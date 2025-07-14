@@ -8,6 +8,7 @@ dependencies = [
     "alembic>=1.16.4",
     "fastapi[all]>=0.116.1",
     "loguru>=0.7.3",
+    "passlib[bcrypt]>=1.7.4",
     "streamlit>=1.46.1",
 ]
 
