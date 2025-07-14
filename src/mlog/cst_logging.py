@@ -1,4 +1,4 @@
-"""Advanced Logging Setup using Loguru, configurable via .env.
+"""Advanced Logging Setup using Loguru, configurable via log_setup.yaml.
 
 Features:
 - Log rotation (by size & time)
@@ -20,26 +20,38 @@ import traceback
 from pathlib import Path
 from typing import IO, Any
 
+import yaml
+
+# === Load YAML CONFIG ===
 from dotenv import load_dotenv
 from loguru import logger as loguru_logger
 
-# === Load .env ===
 load_dotenv()
 
-# === ENV CONFIG ===
-LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG").upper()
-LOG_TO_TERMINAL = os.getenv("LOG_TO_TERMINAL", "false").lower() in ("1", "true", "yes")
-LOG_DIAGNOSE = os.getenv("LOG_DIAGNOSE", "true").lower() in ("1", "true", "yes")
-LOG_SERIALIZE = os.getenv("LOG_SERIALIZE", "false").lower() in ("1", "true", "yes")
-LOG_ENQUEUE = os.getenv("LOG_ENQUEUE", "true").lower() in ("1", "true", "yes")
-LOG_TO_FILE = os.getenv("LOG_TO_FILE", "true").lower() in ("1", "true", "yes")
-LOG_PATH = os.getenv("LOG_PATH", "logs")
-LOG_NAME_PREFIX = os.getenv("LOG_NAME_PREFIX", "app")
-LOG_SIZE_MB = int(os.getenv("LOG_SIZE_MB", "10")) * 1_000_000
-LOG_RETENTION_DAYS = os.getenv("LOG_RETENTION_DAYS", "7")
-LOG_RETENTION = f"{LOG_RETENTION_DAYS} days"
-LOG_SHOW_THREAD = os.getenv("LOG_SHOW_THREAD", "false").lower() in ("1", "true", "yes")
-LOG_SHOW_TIME = os.getenv("LOG_SHOW_TIME", "true").lower() in ("1", "true", "yes")
+CONFIG_FILE = "log_setup.yaml"
+
+with open(CONFIG_FILE) as f:
+    raw_config = yaml.safe_load(f)
+
+# Ambil mode dari log_setup.yaml, default ke 'development' jika tidak ada
+env_mode = raw_config.get("env_mode", "development")
+common = raw_config.get("common", {})
+mode_config = raw_config.get(env_mode, {})
+config = {**common, **mode_config}
+
+# === EXTRACT CONFIG ===
+LOG_LEVEL = config.get("level", "DEBUG").upper()
+LOG_TO_TERMINAL = config.get("to_terminal", False)
+LOG_DIAGNOSE = config.get("diagnose", False)
+LOG_SERIALIZE = config.get("serialize", False)
+LOG_ENQUEUE = config.get("enqueue", True)
+LOG_TO_FILE = config.get("to_file", True)
+LOG_PATH = config.get("log_path", "logs")
+LOG_NAME_PREFIX = config.get("name_prefix", "app")
+LOG_SIZE_MB = int(config.get("size_mb", 10)) * 1_000_000
+LOG_RETENTION = f"{config.get('retention_days', 7)} days"
+LOG_SHOW_THREAD = config.get("show_thread", False)
+LOG_SHOW_TIME = config.get("show_time", True)
 
 
 # === ROTATOR ===
@@ -78,9 +90,9 @@ FORMAT_STR = (
 def cli_format(
     record: Any, show_thread: bool = LOG_SHOW_THREAD, show_time: bool = LOG_SHOW_TIME
 ) -> str:
-    """Safely format log record, matching FORMAT_STR, with options to show thread and time."""
     parts = []
-    parts.append(f"<level>{record['level'].name:<8}</level>")
+    # Tambahkan padding agar mirip uvicorn: 'INFO:     '
+    parts.append(f"<level>{record['level'].name}:     </level>")
     if show_time:
         parts.append(f"{record['time']:YYYY-MM-DD HH:mm:ss}")
     if show_thread:
@@ -96,10 +108,9 @@ def cli_format(
 
 # === SETUP ===
 def setup_logging():
-    """Setup logging configuration for the application.
+    """Set up Loguru logging according to the configuration in log_setup.yaml.
 
-    This function configures the Loguru logger based on the environment variables
-    and the desired logging settings.
+    Configures log sinks, rotation, formatting, and intercepts standard logging.
     """
     loguru_logger.remove()
     Path(LOG_PATH).mkdir(exist_ok=True)
@@ -146,7 +157,6 @@ def setup_logging():
             opener=opener,
         )
 
-    # Intercept std logging
     class InterceptHandler(logging.Handler):
         def emit(self, record: Any):
             try:
@@ -162,16 +172,14 @@ def setup_logging():
             )
 
     logging.basicConfig(handlers=[InterceptHandler()], level=0, force=True)
-    loguru_logger.info(f"Logging initialized at level={LOG_LEVEL}")
+    loguru_logger.info(
+        f"Logging initialized in {env_mode.upper()} mode, level={LOG_LEVEL}"
+    )
 
 
 # === UVICORN PATCH ===
 def patch_uvicorn_loggers():
-    """Patch Uvicorn loggers to use Loguru.
-
-    This function replaces the default logging handlers of Uvicorn with a custom
-    handler that sends log messages to Loguru.
-    """
+    """Patch Uvicorn loggers to route their output through Loguru."""
 
     class Intercept(logging.Handler):
         def emit(self, record: Any):
@@ -194,7 +202,22 @@ def patch_uvicorn_loggers():
 
 # === UTILS ===
 def logger_wraps(*, entry: bool = True, exit: bool = True, level: str = "DEBUG"):
-    """Decorator to log function entry and exit with arguments and results."""
+    """Decorator to log function entry, exit, and arguments/results.
+
+    Parameters
+    ----------
+    entry : bool
+        Whether to log function entry.
+    exit : bool
+        Whether to log function exit.
+    level : str
+        Log level to use.
+
+    Returns:
+    -------
+    Callable
+        Decorated function.
+    """
 
     def wrapper(func: Any):
         @functools.wraps(func)
@@ -214,7 +237,18 @@ def logger_wraps(*, entry: bool = True, exit: bool = True, level: str = "DEBUG")
 
 
 def timer(operation: str | None = None):
-    """Decorator to time the execution of a function."""
+    """Decorator to time a function's execution and log the duration.
+
+    Parameters
+    ----------
+    operation : str or None
+        Optional operation name for logging.
+
+    Returns:
+    -------
+    Callable
+        Decorated function.
+    """
 
     def decorator(func: Any):
         @functools.wraps(func)
@@ -249,10 +283,9 @@ class LogContext:
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any):
-        if self.start_time is not None:
-            duration = time.perf_counter() - self.start_time
-        else:
-            duration = float("nan")
+        duration = (
+            time.perf_counter() - self.start_time if self.start_time else float("nan")
+        )
         if exc_type:
             loguru_logger.error(
                 f"[{self.operation}] Failed after {duration:.3f}s: {exc_val}"
@@ -262,7 +295,15 @@ class LogContext:
 
 
 def log_with_stacktrace(message: str, level: str = "DEBUG"):
-    """Log a message with a stacktrace at the specified log level."""
+    """Log a message along with the current stacktrace.
+
+    Parameters
+    ----------
+    message : str
+        The message to log.
+    level : str
+        Log level to use.
+    """
     stack = "".join(traceback.format_stack())
     loguru_logger.log(level, f"{message}\nStacktrace:\n{stack}")
 
