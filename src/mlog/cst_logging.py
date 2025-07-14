@@ -79,6 +79,13 @@ def opener(file: str, flags: int) -> int:
     return os.open(file, flags, 0o600)
 
 
+# COLORING
+loguru_logger.level("INFO", color="<cyan>")
+loguru_logger.level("WARNING", color="<yellow>")
+loguru_logger.level("ERROR", color="<red>")
+loguru_logger.level("DEBUG", color="<blue>")
+loguru_logger.level("TRACE", color="<white>")
+
 # === FORMAT ===
 FORMAT_STR = (
     "<level>{level: <8}</level> {time:YYYY-MM-DD HH:mm:ss} | "
@@ -88,6 +95,9 @@ FORMAT_STR = (
 )
 
 
+# Add two blank lines before cli_format for PEP 8 compliance
+
+
 def cli_format(
     record: Any,
     show_thread: bool = LOG_SHOW_THREAD,
@@ -95,8 +105,8 @@ def cli_format(
     show_process: bool = LOG_SHOW_PROCESS,
 ) -> str:
     parts = []
-    # Tambahkan padding agar mirip uvicorn: 'INFO:     '
-    parts.append(f"<level>{record['level'].name}:     </level>")
+
+    parts.append(f"<level>{record['level'].name}:</level>")
     if show_time:
         parts.append(f"{record['time']:YYYY-MM-DD HH:mm:ss}")
     if show_thread:
@@ -104,9 +114,9 @@ def cli_format(
     elif show_process:
         parts.append(f"<cyan>{record['process'].name}</cyan>")
     parts.append(
-        f"<magenta>{record['name']}:{record['function']}:{record['line']}</magenta>"
+        f"<magenta>{record['name']}:{record['function']} => {record['line']}</magenta>"
     )
-    parts.append(f"<level>{record['message']}</level>")
+    parts.append(f"{record['message']}")  # <-- tanpa <level>
     return " | ".join(parts) + "\n"
 
 
