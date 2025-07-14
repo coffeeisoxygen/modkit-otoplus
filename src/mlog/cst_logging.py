@@ -52,6 +52,7 @@ LOG_SIZE_MB = int(config.get("size_mb", 10)) * 1_000_000
 LOG_RETENTION = f"{config.get('retention_days', 7)} days"
 LOG_SHOW_THREAD = config.get("show_thread", False)
 LOG_SHOW_TIME = config.get("show_time", True)
+LOG_SHOW_PROCESS = config.get("show_process", False)
 
 
 # === ROTATOR ===
@@ -88,7 +89,10 @@ FORMAT_STR = (
 
 
 def cli_format(
-    record: Any, show_thread: bool = LOG_SHOW_THREAD, show_time: bool = LOG_SHOW_TIME
+    record: Any,
+    show_thread: bool = LOG_SHOW_THREAD,
+    show_time: bool = LOG_SHOW_TIME,
+    show_process: bool = LOG_SHOW_PROCESS,
 ) -> str:
     parts = []
     # Tambahkan padding agar mirip uvicorn: 'INFO:     '
@@ -97,7 +101,7 @@ def cli_format(
         parts.append(f"{record['time']:YYYY-MM-DD HH:mm:ss}")
     if show_thread:
         parts.append(f"<cyan>{record['process'].name}:{record['thread'].name}</cyan>")
-    else:
+    elif show_process:
         parts.append(f"<cyan>{record['process'].name}</cyan>")
     parts.append(
         f"<magenta>{record['name']}:{record['function']}:{record['line']}</magenta>"

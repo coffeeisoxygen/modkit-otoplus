@@ -13,8 +13,9 @@ common:
 development:
   to_terminal: true
   diagnose: true
-  show_thread: true
-  show_time: true
+  show_thread: false
+  show_time: false
+  show_process: false
 
 production:
   to_terminal: false

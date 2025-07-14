@@ -13,7 +13,7 @@ version = version.split(" ")[0]  # Extract the version number only
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):  # noqa: RUF029
+async def lifespan(app: FastAPI):  # noqa: ARG001, RUF029
     """Application lifespan events."""
     logger.info("Starting application...")
     yield
