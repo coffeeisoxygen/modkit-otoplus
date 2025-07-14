@@ -89,3 +89,21 @@ class AppException:
                 status_code,
                 context or {"message": "urlreport must be a valid URL."},
             )
+
+    class UserNotFound(AppExceptionError):
+        """Exception raised when a user is not found."""
+
+        def __init__(self, user_id: int):
+            super().__init__(422, {"message": f"User ID {user_id} not found"})
+
+    class UsernameAlreadyExists(AppExceptionError):
+        """Exception raised when a username already exists."""
+
+        def __init__(self, username: str):
+            super().__init__(422, {"message": f"Username '{username}' already exists"})
+
+    class DatabaseError(AppExceptionError):
+        """Exception raised for database errors."""
+
+        def __init__(self, error: str):
+            super().__init__(500, {"message": "Database error", "detail": error})
