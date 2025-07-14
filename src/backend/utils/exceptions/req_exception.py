@@ -7,13 +7,13 @@ from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 from src.backend.utils.exceptions.app_exceptions import AppExceptionError
 
 
-async def http_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+async def http_exception_handler(request: Request, exc: Exception) -> JSONResponse:  # noqa: ARG001, RUF029
     if isinstance(exc, HTTPException):
         return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
     raise exc
 
 
-async def request_validation_exception_handler(
+async def request_validation_exception_handler(  # noqa: RUF029
     request: Request, exc: Exception
 ) -> JSONResponse:
     if isinstance(exc, RequestValidationError):
@@ -24,7 +24,7 @@ async def request_validation_exception_handler(
     raise exc
 
 
-async def app_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+async def app_exception_handler(request: Request, exc: Exception) -> JSONResponse:  # noqa: ARG001
     if isinstance(exc, AppExceptionError):
         return JSONResponse(
             status_code=exc.status_code,

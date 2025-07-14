@@ -19,6 +19,8 @@ class UserCRUD(AppCRUD):
         user_data = data.model_dump(exclude={"password_confirm"})
         if "password" in user_data:
             user_data["password"] = hash_password(user_data["password"])
+        allowed_fields = {c.name for c in User.__table__.columns}
+        user_data = {k: v for k, v in user_data.items() if k in allowed_fields}
         user = User(**user_data)
         self.db.add(user)
         self.db.commit()
@@ -29,6 +31,8 @@ class UserCRUD(AppCRUD):
         update_data = data.model_dump(exclude_unset=True)
         if "password" in update_data:
             update_data["password"] = hash_password(update_data["password"])
+        allowed_fields = {c.name for c in User.__table__.columns}
+        update_data = {k: v for k, v in update_data.items() if k in allowed_fields}
         for key, value in update_data.items():
             setattr(user, key, value)
         self.db.commit()
