@@ -55,3 +55,5 @@ src/_version.py
 # OS-specific files
 .DS_Store
 Thumbs.db
+.github/copilot-instructions.md
+.github/instructions/
