@@ -2,12 +2,23 @@ from contextlib import asynccontextmanager
 
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import (
+    FastAPI,
+    HTTPException,  # <-- add this import
+)
+from fastapi.exceptions import RequestValidationError
 
+from mlog.cst_logging import logger, patch_uvicorn_loggers, setup_logging
 from src._version import __version__ as version
 from src.backend.api.v1.member import router as member_router
-from src.mlog.cst_logging import logger, patch_uvicorn_loggers, setup_logging
 from src.backend.api.v1.user import router as user_router
+from src.backend.utils.exceptions.app_exceptions import AppExceptionError
+from src.backend.utils.exceptions.req_exception import (
+    app_exception_handler,
+    http_exception_handler,
+    request_validation_exception_handler,
+)
+
 # Load .env
 load_dotenv()
 
@@ -18,7 +29,7 @@ version = version.split(" ")[0]
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI):  # noqa: ARG001, RUF029
     """Application lifespan events (startup/shutdown)."""
     logger.info("Starting application...")
     yield
@@ -33,18 +44,19 @@ app = FastAPI(
 )
 app.include_router(member_router)
 app.include_router(user_router)
+
+
+# Register the handler for FastAPI's HTTPException, not Starlette's
+app.add_exception_handler(HTTPException, http_exception_handler)
+app.add_exception_handler(RequestValidationError, request_validation_exception_handler)
+app.add_exception_handler(AppExceptionError, app_exception_handler)
+
+
 @app.get("/")
 async def read_root():
     """Root endpoint."""
     logger.info("Hello endpoint accessed")
     return {"message": "Hello World"}
-
-
-@app.get("/items/{item_id}")
-async def read_item(item_id: int):
-    # Simulate data fetching process
-    item_data = f"Item data for {item_id}"
-    return {"item_id": item_id, "cached": False, "data": item_data}
 
 
 if __name__ == "__main__":
