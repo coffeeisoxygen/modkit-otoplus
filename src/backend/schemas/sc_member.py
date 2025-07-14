@@ -1,29 +1,33 @@
 from datetime import datetime
-from typing import Optional
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from pydantic import BaseModel, field_validator
-
-from src.backend.schemas.validators import (
+from src.backend.utils.validator.member_validator import (
     validate_ip,
-    validate_name,
-    validate_password,
+    validate_member_name,
+    validate_member_password,
     validate_pin,
     validate_url,
 )
 
 
 class MemberBase(BaseModel):
-    name: str
+    name: str = Field(..., min_length=6)
     ipaddress: str
     urlreport: str | None = None
-    pin: str
-    password: str
+    pin: str = Field(..., min_length=6, max_length=6)
+    password: str = Field(..., min_length=6)
     is_active: bool = True
+    allow_no_sign: bool = False
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        from_attributes=True
+    )
 
     @field_validator("name")
     @classmethod
     def validate_name(cls, v: str) -> str:
-        return validate_name(v)
+        return validate_member_name(v)
 
     @field_validator("ipaddress")
     @classmethod
@@ -43,10 +47,12 @@ class MemberBase(BaseModel):
     @field_validator("password")
     @classmethod
     def validate_password(cls, v: str) -> str:
-        return validate_password(v)
+        return validate_member_password(v)
+
 
 class MemberCreate(MemberBase):
     pass
+
 
 class MemberUpdate(BaseModel):
     name: str | None = None
@@ -55,11 +61,16 @@ class MemberUpdate(BaseModel):
     pin: str | None = None
     password: str | None = None
     is_active: bool | None = None
+    allow_no_sign: bool | None = None
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True
+    )
 
     @field_validator("name")
     @classmethod
     def validate_name(cls, v: str | None) -> str | None:
-        return validate_name(v) if v is not None else v
+        return validate_member_name(v) if v is not None else v
 
     @field_validator("ipaddress")
     @classmethod
@@ -79,11 +90,9 @@ class MemberUpdate(BaseModel):
     @field_validator("password")
     @classmethod
     def validate_password(cls, v: str | None) -> str | None:
-        return validate_password(v) if v is not None else v
+        return validate_member_password(v) if v is not None else v
+
 
 class MemberRead(MemberBase):
     id: int
     created_at: datetime
-
-    class Config:
-        from_attributes = True

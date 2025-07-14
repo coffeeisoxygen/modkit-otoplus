@@ -2,19 +2,14 @@ import ipaddress
 
 from pydantic import AnyHttpUrl
 
-from src.backend.schemas.exception import (
-    IPAddressValidationError,
-    NameValidationError,
-    PasswordValidationError,
-    PinValidationError,
-    URLReportValidationError,
-)
+from src.backend.utils.exceptions.app_exceptions import AppException
+from src.backend.utils.validator.cmn_validator import validate_alphanumeric_name, validate_strength_password
 
 
-def validate_name(v: str) -> str:
+def validate_member_name(v: str) -> str:
     """Validating member name."""
-    if v is not None and (not isinstance(v, str) or not v.isalnum()):
-        raise NameValidationError()
+    if not validate_alphanumeric_name(v):
+        raise AppException.NameValidationError()
     return v
 
 
@@ -24,7 +19,7 @@ def validate_ip(v: str) -> str:
         try:
             ipaddress.ip_address(v)
         except Exception as e:
-            raise IPAddressValidationError() from e
+            raise AppException.IPAddressValidationError() from e
     return v
 
 
@@ -34,7 +29,7 @@ def validate_url(v: str | None) -> str | None:
         try:
             AnyHttpUrl(v)
         except Exception as e:
-            raise URLReportValidationError() from e
+            raise AppException.URLReportValidationError() from e
     return v
 
 
@@ -44,12 +39,12 @@ def validate_pin(v: str | int) -> str:
         if isinstance(v, int):
             v = str(v)
         if not v.isdigit() or len(v) != 6:
-            raise PinValidationError()
+            raise AppException.PinValidationError()
     return v
 
 
-def validate_password(v: str) -> str:
+def validate_member_password(v: str) -> str:
     """Validating member password."""
-    if v is not None and (not isinstance(v, str) or not (6 <= len(v) <= 10)):
-        raise PasswordValidationError()
+    if not validate_strength_password(v):
+        raise AppException.PasswordValidationError()
     return v
