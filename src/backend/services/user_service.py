@@ -45,12 +45,12 @@ class UserService(AppService):
     def get_user(self, user_id: int) -> ServiceResult:
         user = UserCRUD(self.db).get_by_id(user_id)
         if not user:
-            return ServiceResult(AppException.UserNotFound(user_id))
+            return ServiceResult(AppException.UserNotFouncError(user_id))
         return ServiceResult(user)
 
     def create_user(self, data: UserCreate) -> ServiceResult:
         if UserCRUD(self.db).get_by_username(data.username):
-            return ServiceResult(AppException.UsernameAlreadyExists(data.username))
+            return ServiceResult(AppException.UsernameAlreadyExistsError(data.username))
         try:
             user = UserCRUD(self.db).create(data)
             return ServiceResult(user)
@@ -61,7 +61,7 @@ class UserService(AppService):
         crud = UserCRUD(self.db)
         user = crud.get_by_id(user_id)
         if not user:
-            return ServiceResult(AppException.UserNotFound(user_id))
+            return ServiceResult(AppException.UserNotFouncError(user_id))
         updated_user = crud.update(user, data)
         return ServiceResult(updated_user)
 
@@ -69,6 +69,6 @@ class UserService(AppService):
         crud = UserCRUD(self.db)
         user = crud.get_by_id(user_id)
         if not user:
-            return ServiceResult(AppException.UserNotFound(user_id))
+            return ServiceResult(AppException.UserNotFouncError(user_id))
         crud.delete(user)
         return ServiceResult({"deleted": True})

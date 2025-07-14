@@ -35,6 +35,7 @@ class AppException:
             AppExceptionError.__init__(
                 self, status_code, context or {"message": "Username cannot be empty"}
             )
+
     class PasswordHashValidationError(AppExceptionError):
         """Exception raised for errors in the password hash validation."""
 
@@ -45,6 +46,7 @@ class AppException:
                 status_code,
                 context or {"message": "Password hash must be a valid hash."},
             )
+
     class PasswordConfirmValidationError(AppExceptionError):
         """Exception raised for errors in the password confirmation validation."""
 
@@ -110,13 +112,13 @@ class AppException:
                 context or {"message": "urlreport must be a valid URL."},
             )
 
-    class UserNotFound(AppExceptionError):
+    class UserNotFouncError(AppExceptionError):
         """Exception raised when a user is not found."""
 
         def __init__(self, user_id: int):
             super().__init__(422, {"message": f"User ID {user_id} not found"})
 
-    class UsernameAlreadyExists(AppExceptionError):
+    class UsernameAlreadyExistsError(AppExceptionError):
         """Exception raised when a username already exists."""
 
         def __init__(self, username: str):
