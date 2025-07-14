@@ -2,9 +2,8 @@
 
 from datetime import datetime
 
+from config.database import Base
 from sqlalchemy import Boolean, Column, DateTime, Integer, String
-
-from .md_base import Base  # Import Base dari md_base.py
 
 
 class Member(Base):

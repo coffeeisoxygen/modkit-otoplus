@@ -1,10 +1,10 @@
-from unittest.mock import MagicMock, patch
-from datetime import datetime
 import json
+from datetime import datetime
+from unittest.mock import MagicMock, patch
 
 import pytest
 from src.backend.models.md_member import Member
-from src.backend.schemas.sc_member import MemberCreate, MemberUpdate, MemberRead
+from src.backend.schemas.sc_member import MemberCreate, MemberRead, MemberUpdate
 from src.backend.services import member_service
 
 
@@ -16,14 +16,25 @@ def session():
 @pytest.fixture
 def member():
     return Member(
-        id=1, name="test", ipaddress="127.0.0.1", urlreport=None, pin="123456", password="secret", is_active=True
+        id=1,
+        name="test",
+        ipaddress="127.0.0.1",
+        urlreport=None,
+        pin="123456",
+        password="secret",
+        is_active=True,
     )
 
 
 @pytest.fixture
 def member_create():
     return MemberCreate(
-        name="test", ipaddress="127.0.0.1", urlreport=None, pin="123456", password="secret", is_active=True
+        name="test",
+        ipaddress="127.0.0.1",
+        urlreport=None,
+        pin="123456",
+        password="secret",
+        is_active=True,
     )
 
 
@@ -41,10 +52,14 @@ def test_get_by_id_cache_hit(session, member):
         "pin": member.pin or "123456",
         "password": member.password or "secret",
         "is_active": member.is_active if member.is_active is not None else True,
-        "created_at": member.created_at if hasattr(member, "created_at") and member.created_at else datetime.now(),
+        "created_at": member.created_at
+        if hasattr(member, "created_at") and member.created_at
+        else datetime.now(),
     }
     # Simulate cache returning JSON string
-    with patch.object(member_service.cache, "get", return_value=json.dumps(member_dict)):
+    with patch.object(
+        member_service.cache, "get", return_value=json.dumps(member_dict)
+    ):
         result = member_service.get_by_id(session, member.id)
         assert isinstance(result, MemberRead)
         assert result.id == member.id
@@ -180,7 +195,6 @@ def test_delete_member_not_found(session):
 
 
 def test_list_members_cache_hit(session, member):
-    from datetime import datetime
     member_dict = {
         "id": member.id,
         "name": member.name,
@@ -189,16 +203,22 @@ def test_list_members_cache_hit(session, member):
         "pin": member.pin,
         "password": member.password,
         "is_active": member.is_active,
-        "created_at": member.created_at.isoformat() if member.created_at else datetime.now().isoformat(),
+        "created_at": member.created_at.isoformat()
+        if member.created_at
+        else datetime.now().isoformat(),
     }
-    with patch.object(member_service.cache, "get", return_value=json.dumps([member_dict])):
+    with patch.object(
+        member_service.cache, "get", return_value=json.dumps([member_dict])
+    ):
         result = member_service.list_members(session)
         # Convert types from JSON (all str) to correct types for MemberRead
         member_dict_cast = member_dict.copy()
         member_dict_cast["id"] = int(member_dict_cast["id"])
         member_dict_cast["is_active"] = bool(member_dict_cast["is_active"])
-        from datetime import datetime as dt
-        member_dict_cast["created_at"] = dt.fromisoformat(member_dict_cast["created_at"])
+
+        member_dict_cast["created_at"] = datetime.fromisoformat(
+            member_dict_cast["created_at"]
+        )
         assert result == [MemberRead(**member_dict_cast)]
 
 
@@ -210,16 +230,18 @@ def test_list_members_db_hit(session, member):
         patch.object(member_service.cache, "set") as cache_set,
     ):
         result = member_service.list_members(session)
-        expected = [MemberRead(
-            id=member.id,
-            name=member.name,
-            ipaddress=member.ipaddress,
-            urlreport=member.urlreport,
-            pin=member.pin,
-            password=member.password,
-            is_active=member.is_active,
-            created_at=member.created_at,
-        )]
+        expected = [
+            MemberRead(
+                id=member.id,
+                name=member.name,
+                ipaddress=member.ipaddress,
+                urlreport=member.urlreport,
+                pin=member.pin,
+                password=member.password,
+                is_active=member.is_active,
+                created_at=member.created_at,
+            )
+        ]
         assert result == expected
         cache_set.assert_called_once()
 

@@ -6,9 +6,7 @@ from typing import Annotated
 from dotenv import load_dotenv
 from fastapi import Depends
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
-
-from src.backend.models.md_base import Base  # Ganti ini, jangan deklarasi ulang!
+from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
 # --- Load env ---
 load_dotenv(dotenv_path=".env")
@@ -56,6 +54,8 @@ def create_database_and_tables():
     """Create DB & tables — dev only."""
     Base.metadata.create_all(engine)
 
+
+Base = declarative_base()
 
 # Example usage for Streamlit/scripts:
 # with SessionLocal() as session:

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
+
 from src.backend.config.database import DBSession
-from src.backend.schemas.sc_member import MemberCreate, MemberUpdate, MemberRead
+from src.backend.schemas.sc_member import MemberCreate, MemberRead, MemberUpdate
 from src.backend.services import member_service
 
 router = APIRouter(prefix="/v1/members", tags=["Members"])
