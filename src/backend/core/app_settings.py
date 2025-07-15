@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     CACHE_MAX_SIZE: int = 100
     SECRET_KEY: str
     ALGORITHM: str
+    ADMIN_USERNAME: str
+    ADMIN_PASSWORD: str
+    ADMIN_EMAIL: str
 
     model_config = {
         "env_file": ".env",

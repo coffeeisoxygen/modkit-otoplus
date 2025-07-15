@@ -15,7 +15,7 @@ from src.backend.utils.exceptions.app_exceptions import AppException
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: DBSession = Depends()):
+def get_current_user(db: DBSession, token: str = Depends(oauth2_scheme)):
     """Ambil user dari JWT token.
 
     Args:
