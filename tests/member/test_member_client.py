@@ -131,7 +131,7 @@ def test_get_member_forbidden_for_non_admin(user_payload):
     assert response.status_code in (403, 422)
 
 
-def test_update_member_admin_success(_user_payload):
+def test_update_member_admin_success(user_payload):
     ensure_admin_user()
     token = get_auth_token("Administrator", "@Admin12345")
     member_payload = unique_member_payload()
@@ -186,7 +186,7 @@ def test_update_member_forbidden_for_non_admin(user_payload):
     assert response.status_code in (403, 422)
 
 
-def test_delete_member_admin_success(_user_payload):
+def test_delete_member_admin_success(user_payload):
     ensure_admin_user()
     token = get_auth_token("Administrator", "@Admin12345")
     member_payload = unique_member_payload()
@@ -234,7 +234,7 @@ def test_delete_member_forbidden_for_non_admin(user_payload):
     assert response.status_code in (403, 422)
 
 
-def test_list_members_admin_success(_user_payload):
+def test_list_members_admin_success(user_payload):
     ensure_admin_user()
     token = get_auth_token("Administrator", "@Admin12345")
     member_payload = unique_member_payload()
