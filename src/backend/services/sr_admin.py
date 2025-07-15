@@ -4,8 +4,8 @@ from src.backend.core.app_settings import get_settings
 from src.backend.schemas.sc_user import UserCreate
 from src.backend.services.base import AppService
 from src.backend.services.sr_user import UserCRUD
-from src.backend.utils.exceptions.app_exceptions import AppException
-from src.backend.utils.result.service_result import ServiceResult
+from src.backend.utils.app_exceptions import AppException
+from src.backend.utils.service_result import ServiceResult
 
 
 class AdminSeeder(AppService):

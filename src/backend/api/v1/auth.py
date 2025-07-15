@@ -3,7 +3,7 @@ from fastapi import APIRouter, Form
 from src.backend.core.app_dbsetting import DBSession
 from src.backend.schemas.sc_auth import TokenResponse
 from src.backend.services.sr_auth import AuthService
-from src.backend.utils.result.service_result import handle_result
+from src.backend.utils.service_result import handle_result
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 

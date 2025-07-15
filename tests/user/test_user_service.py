@@ -4,8 +4,8 @@ import pytest
 from src.backend.models.md_user import User
 from src.backend.schemas.sc_user import UserCreate, UserUpdate
 from src.backend.services.sr_user import UserService
-from src.backend.utils.exceptions.app_exceptions import AppException
-from src.backend.utils.result.service_result import ServiceResult
+from src.backend.utils.app_exceptions import AppException
+from src.backend.utils.service_result import ServiceResult
 
 
 @pytest.fixture

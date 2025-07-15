@@ -1,7 +1,7 @@
 import inspect
 from typing import Any
 
-from src.backend.utils.exceptions.app_exceptions import AppExceptionError
+from src.backend.utils.app_exceptions import AppExceptionError
 from src.mlog.cst_logging import logger
 
 
