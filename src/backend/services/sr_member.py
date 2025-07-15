@@ -141,6 +141,7 @@ def member_to_dict(member: Member) -> dict:
         "password": member.password,
         "is_active": member.is_active,
         "allow_no_sign": member.allow_no_sign,
+        "balance": member.balance,
         "created_at": member.created_at.isoformat()
         if getattr(member, "created_at", None) is not None
         else None,

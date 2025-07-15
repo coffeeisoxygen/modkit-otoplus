@@ -191,3 +191,12 @@ class AppException:
                 HTTPStatus.NOT_FOUND,
                 {"message": f"Member ID {member_id} not found"},
             )
+
+    class InsufficientBalanceError(AppExceptionError):
+        """Exception raised when a member has insufficient balance. Hasan Maki and Copilot."""
+
+        def __init__(self, current_balance: float):
+            super().__init__(
+                HTTPStatus.UNPROCESSABLE_ENTITY,
+                {"message": "Insufficient balance", "current_balance": current_balance},
+            )

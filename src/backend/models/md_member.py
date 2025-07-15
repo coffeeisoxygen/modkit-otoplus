@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Integer, String
+from sqlalchemy import Boolean, DateTime, Float, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.backend.core.app_dbsetting import Base
@@ -17,6 +17,7 @@ class Member(Base):
     name: Mapped[str] = mapped_column(
         String(10), unique=True, index=True, nullable=False
     )
+    balance: Mapped[float] = mapped_column(Float, default=0, nullable=False)
     ipaddress: Mapped[str] = mapped_column(String(45), index=True, nullable=False)
     urlreport: Mapped[str | None] = mapped_column(String(255), nullable=True)
     pin: Mapped[str] = mapped_column(String(10), nullable=False)

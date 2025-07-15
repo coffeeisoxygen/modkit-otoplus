@@ -19,6 +19,7 @@ class MemberBase(BaseModel):
     password: str = Field(..., min_length=6)
     is_active: bool = True
     allow_no_sign: bool = False
+    balance: float = 0.0
 
     model_config = ConfigDict(str_strip_whitespace=True, from_attributes=True)
 
@@ -60,6 +61,7 @@ class MemberUpdate(BaseModel):
     password: str | None = None
     is_active: bool | None = None
     allow_no_sign: bool | None = None
+    balance: float | None = None
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
