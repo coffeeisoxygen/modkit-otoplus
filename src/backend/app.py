@@ -2,11 +2,9 @@ from contextlib import asynccontextmanager
 
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import (
-    FastAPI,
-    HTTPException,  # <-- add this import
-)
+from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
+from fastapi.security import OAuth2PasswordBearer
 
 from mlog.cst_logging import logger, patch_uvicorn_loggers, setup_logging
 from src._version import __version__ as version
@@ -38,10 +36,11 @@ async def lifespan(app: FastAPI):  # noqa: ARG001, RUF029
 
 app = FastAPI(
     lifespan=lifespan,
-    title="My FastAPI App",
-    description="This is a sample FastAPI application.",
+    title="modkit-otoplus",
+    description="Menjembatani transaksi antara otomax dan addon addon otoplus.",
     version=version,
 )
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 app.include_router(member_router)
 app.include_router(user_router)
 

@@ -1,11 +1,12 @@
-from src.mlog.cst_logging import logger
 import inspect
+from typing import Any
 
 from src.backend.utils.exceptions.app_exceptions import AppExceptionError
+from src.mlog.cst_logging import logger
 
 
-class ServiceResult(object):
-    def __init__(self, arg):
+class ServiceResult:
+    def __init__(self, arg: Any):
         if isinstance(arg, AppExceptionError):
             self.success = False
             self.exception_case = arg.exception_case
@@ -36,11 +37,13 @@ class ServiceResult(object):
 
 
 def caller_info() -> str:
+    """Get information about the caller function."""
     info = inspect.getframeinfo(inspect.stack()[2][0])
     return f"{info.filename}:{info.function}:{info.lineno}"
 
 
 def handle_result(result: ServiceResult, log_success: bool = False):
+    """Handle the result of a service operation."""
     if not result.success:
         with result as exception:
             logger.error(f"{exception} | caller={caller_info()}")

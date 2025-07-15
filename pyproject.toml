@@ -106,6 +106,7 @@ convention = "google"
 "scripts/*" = ["D100"]
 "__init__.py" = ["D104"]
 "_version.py" = ["D", "ANN", "E", "W", "F", "I", "UP", "B"]
+"src/backend/utils/exceptions/req_exception.py" = ["ALL"]
 
 [tool.ruff.format]
 quote-style = "double"
