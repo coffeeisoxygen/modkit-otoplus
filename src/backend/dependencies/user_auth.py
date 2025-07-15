@@ -3,12 +3,15 @@
 Hasan Maki and Copilot
 """
 
+from typing import Annotated
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 
 from src.backend.core.app_dbsetting import DBSession
 from src.backend.core.app_settings import get_settings
+from src.backend.models.md_user import User as UserModel
 from src.backend.services.sr_user import UserCRUD
 from src.backend.utils.exceptions.app_exceptions import AppException
 
@@ -50,3 +53,6 @@ def get_current_user(db: DBSession, token: str = Depends(oauth2_scheme)):
     if not user:
         raise AppException.UserNotFouncError(int(user_id))
     return user
+
+
+CurrentUser = Annotated[UserModel, Depends(get_current_user)]
