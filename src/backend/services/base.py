@@ -1,6 +1,23 @@
-from dataclasses import dataclass
+"""Modul base.py.
 
-from sqlalchemy.orm import Session
+Modul ini merupakan fondasi untuk context session database dan service CRUD di backend.
+
+- DBSessionContext: Kelas dasar untuk manajemen session database SQLAlchemy.
+- AppService: Kelas dasar untuk service aplikasi yang membutuhkan akses database.
+- AppCRUD: Kelas dasar untuk operasi CRUD model tertentu.
+
+Semua service dan CRUD di backend sebaiknya mewarisi kelas-kelas ini agar konsisten dan mudah di-maintain.
+
+Session yang digunakan harus berasal dari SessionLocal di src.backend.core.app_dbsetting untuk menjaga konsistensi konfigurasi database.
+
+Hasan Maki and Copilot
+"""
+
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
 
 
 @dataclass
@@ -8,10 +25,10 @@ class DBSessionContext:
     """Base context class for database session management.
 
     Attributes:
-        db (Session): The SQLAlchemy database session.
+        db (Session): The SQLAlchemy database session dari SessionLocal.
     """
 
-    db: Session
+    db: "Session"
 
 
 class AppService(DBSessionContext):

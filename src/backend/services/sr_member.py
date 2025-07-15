@@ -7,30 +7,24 @@ from src.backend.exceptions.cst_exception import AppException
 from src.backend.models.md_member import Member
 from src.backend.models.md_user import User
 from src.backend.schemas.sc_member import MemberCreate, MemberUpdate
-from src.backend.services.base import AppService
+from src.backend.services.base import AppCRUD, AppService
 from src.backend.services.service_result import ServiceResult
 from src.mlog.mylog import logger
 
 
-class MemberCRUD:
-    def __init__(self, db):
-        self.db = db
-
+class MemberCRUD(AppCRUD):
     def get_by_id(self, member_id: int) -> Member | None:
-        member = self.db.get(Member, member_id)
-        return member
+        return self.db.get(Member, member_id)
 
     def get_by_ip(self, ip: str) -> Member | None:
-        member = self.db.execute(
+        return self.db.execute(
             select(Member).where(Member.ipaddress == ip)
         ).scalar_one_or_none()
-        return member
 
     def get_by_name(self, name: str) -> Member | None:
-        member = self.db.execute(
+        return self.db.execute(
             select(Member).where(Member.name == name)
         ).scalar_one_or_none()
-        return member
 
     def create(self, data: MemberCreate) -> Member:
         member = Member(**data.model_dump())
