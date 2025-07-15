@@ -1,5 +1,3 @@
-from typing import Any
-
 from fastapi import APIRouter, Body
 
 from src.backend.core.app_dbsetting import DBSession
@@ -8,7 +6,12 @@ from src.backend.dependencies.auth_dependency import (
     require_admin,
     require_owner_or_admin,
 )
-from src.backend.schemas.sc_member import MemberCreate, MemberRead, MemberUpdate
+from src.backend.schemas.sc_member import (
+    BalanceResponse,
+    MemberCreate,
+    MemberRead,
+    MemberUpdate,
+)
 from src.backend.services.service_result import handle_result
 from src.backend.services.sr_balance import BalanceService
 from src.backend.services.sr_member import MemberService
@@ -151,80 +154,83 @@ def delete_member(
     return handle_result(result)
 
 
-@router.get("/{member_id}/balance", response_model=dict)
+@router.get("/{member_id}/balance", response_model=BalanceResponse)
 def get_member_balance(
     member_id: int,
     db: DBSession,
     current_user: CurrentUser,
-) -> Any:
-    """Get member balance by ID.
+) -> BalanceResponse:
+    """Ambil saldo member berdasarkan ID.
 
-    Parameters
-    ----------
-    member_id : int
-        The ID of the member.
-    db : DBSession
-        Database session.
-    current_user : CurrentUser
-        The current authenticated user.
+    Args:
+        member_id (int): ID member yang ingin dicek saldonya.
+        db (DBSession): Session database.
+        current_user (CurrentUser): User yang sedang login (admin/owner).
 
     Returns:
-    -------
-    dict
-        The member's balance.
+        BalanceResponse: Saldo member.
+
+    Raises:
+        HTTPException: Jika bukan admin/owner.
+
+    Hasan Maki and Copilot
     """
     require_owner_or_admin(member_id, current_user)
     result = BalanceService(db).get_balance(member_id)
     return handle_result(result)
 
 
-@router.post("/{member_id}/balance/add", response_model=dict)
+@router.post("/{member_id}/balance/add", response_model=BalanceResponse)
 def add_member_balance(
     member_id: int,
     db: DBSession,
+    current_user: CurrentUser,
     amount: float = Body(..., embed=True),
-) -> Any:
-    """Add balance to member by ID.
+) -> BalanceResponse:
+    """Tambah saldo member (hanya admin).
 
-    Parameters
-    ----------
-    member_id : int
-        The ID of the member.
-    db : DBSession
-        Database session.
-    amount : float
-        Amount to add.
+    Args:
+        member_id (int): ID member.
+        db (DBSession): Session database.
+        current_user (CurrentUser): User yang sedang login (harus admin).
+        amount (float): Jumlah saldo yang akan ditambahkan.
 
     Returns:
-    -------
-    dict
-        Result of the balance addition.
+        BalanceResponse: Saldo member setelah penambahan.
+
+    Raises:
+        HTTPException: Jika bukan admin.
+
+    Hasan Maki and Copilot
     """
+    require_admin(current_user)
     result = BalanceService(db).add_balance(member_id, amount)
     return handle_result(result)
 
 
-@router.post("/{member_id}/balance/deduct", response_model=dict)
+@router.post("/{member_id}/balance/deduct", response_model=BalanceResponse)
 def deduct_member_balance(
     member_id: int,
     db: DBSession,
+    current_user: CurrentUser,
     amount: float = Body(..., embed=True),
-) -> Any:
-    """Deduct balance from member by ID.
+) -> BalanceResponse:
+    """Kurangi saldo member (hanya admin).
 
-    Parameters
-    ----------
-    member_id : int
-        The ID of the member.
-    db : DBSession
-        Database session.
-    amount : float
-        Amount to deduct.
+    Args:
+        member_id (int): ID member.
+        db (DBSession): Session database.
+        current_user (CurrentUser): User yang sedang login (harus admin).
+        amount (float): Jumlah saldo yang akan dikurangi.
 
     Returns:
-    -------
-    dict
-        Result of the balance deduction.
+        BalanceResponse: Saldo member setelah pengurangan.
+
+    Raises:
+        HTTPException: Jika bukan admin.
+
+    Hasan Maki and Copilot
     """
+    require_admin(current_user)
     result = BalanceService(db).deduct_balance(member_id, amount)
     return handle_result(result)
