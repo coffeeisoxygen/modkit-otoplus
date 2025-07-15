@@ -60,33 +60,33 @@ def get_user(user_id: int, db: DBSession, _: CurrentUser):
 
 
 @router.put("/{user_id}", response_model=UserRead)
-def update_user(user_id: int, data: UserUpdate, db: DBSession, _: CurrentUser):
+def update_user(user_id: int, data: UserUpdate, db: DBSession, current_user: CurrentUser):
     """Update an existing user's information.
 
     Args:
         user_id (int): The ID of the user to update.
         data (UserUpdate): The update payload.
         db (DBSession): Database session dependency.
-        _ (UserModel): The current authenticated user (unused, for auth only).
+        current_user (UserModel): The current authenticated user.
 
     Returns:
         UserRead: The updated user's data.
     """
-    result = UserService(db).update_user(user_id, data)
+    result = UserService(db).update_user(user_id, data, current_user)
     return handle_result(result)
 
 
 @router.delete("/{user_id}")
-def delete_user(user_id: int, db: DBSession, _: CurrentUser):
+def delete_user(user_id: int, db: DBSession, current_user: CurrentUser):
     """Delete a user by ID.
 
     Args:
         user_id (int): The ID of the user to delete.
         db (DBSession): Database session dependency.
-        _ (UserModel): The current authenticated user (unused, for auth only).
+        current_user (UserModel): The current authenticated user.
 
     Returns:
         Any: The result of the delete operation.
     """
-    result = UserService(db).delete_user(user_id)
+    result = UserService(db).delete_user(user_id, current_user)
     return handle_result(result)

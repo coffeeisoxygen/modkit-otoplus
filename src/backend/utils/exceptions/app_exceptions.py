@@ -147,3 +147,9 @@ class AppException:
 
         def __init__(self):
             super().__init__(401, {"message": "Invalid or expired token"})
+
+    class ForbiddenActionError(AppExceptionError):
+        """Exception raised for forbidden actions."""
+
+        def __init__(self, action: str):
+            super().__init__(403, {"message": f"Action '{action}' is forbidden"})

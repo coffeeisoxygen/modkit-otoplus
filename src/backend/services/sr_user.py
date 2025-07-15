@@ -53,26 +53,40 @@ class UserService(AppService):
         return ServiceResult(user)
 
     def create_user(self, data: UserCreate) -> ServiceResult:
+        # Cegah duplikat username
         if UserCRUD(self.db).get_by_username(data.username):
             return ServiceResult(AppException.UsernameAlreadyExistsError(data.username))
         try:
+            # Paksa is_superuser = False
+            data.is_superuser = False
             user = UserCRUD(self.db).create(data)
             return ServiceResult(user)
         except SQLAlchemyError as e:
             return ServiceResult(AppException.DatabaseError(str(e)))
 
-    def update_user(self, user_id: int, data: UserUpdate) -> ServiceResult:
+    def update_user(
+        self, user_id: int, data: UserUpdate, current_user: User
+    ) -> ServiceResult:
         crud = UserCRUD(self.db)
         user = crud.get_by_id(user_id)
         if not user:
             return ServiceResult(AppException.UserNotFouncError(user_id))
+        # ❗ Hanya admin atau diri sendiri
+        if current_user.id != user_id and not current_user.is_superuser:
+            return ServiceResult(AppException.ForbiddenActionError("Hanya admin atau diri sendiri yang dapat mengubah data ini"))
+        # User biasa gak boleh update is_superuser
+        if not current_user.is_superuser:
+            data.is_superuser = None  # abaikan input is_superuser
         updated_user = crud.update(user, data)
         return ServiceResult(updated_user)
 
-    def delete_user(self, user_id: int) -> ServiceResult:
+    def delete_user(self, user_id: int, current_user: User) -> ServiceResult:
         crud = UserCRUD(self.db)
         user = crud.get_by_id(user_id)
         if not user:
             return ServiceResult(AppException.UserNotFouncError(user_id))
+        # ❗ Hanya admin atau diri sendiri
+        if current_user.id != user_id and not current_user.is_superuser:
+            return ServiceResult(AppException.ForbiddenActionError("Hanya admin atau diri sendiri yang dapat menghapus data ini"))
         crud.delete(user)
         return ServiceResult({"deleted": True})
