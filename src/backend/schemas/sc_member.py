@@ -94,3 +94,21 @@ class MemberUpdate(BaseModel):
 class MemberRead(MemberBase):
     id: int
     created_at: datetime
+
+
+class BalanceResponse(BaseModel):
+    balance: float
+
+    class Config:
+        from_attributes = True
+
+    """Response schema for member balance. Hasan Maki and Copilot"""
+
+
+class BalanceUpdateRequest(BaseModel):
+    amount: float
+
+    class Config:
+        from_attributes = True
+
+    """Request schema for updating member balance. Hasan Maki and Copilot"""

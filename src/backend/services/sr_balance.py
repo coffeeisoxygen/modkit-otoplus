@@ -1,5 +1,6 @@
 from src.backend.exceptions.cst_exception import AppException
 from src.backend.models.md_member import Member
+from src.backend.schemas.sc_member import BalanceResponse
 from src.backend.services.base import AppService
 from src.backend.services.service_result import ServiceResult
 
@@ -9,7 +10,8 @@ class BalanceService(AppService):
         member = self.db.get(Member, member_id)
         if not member:
             return ServiceResult(AppException.MemberNotFoundError(member_id))
-        return ServiceResult({"balance": member.balance})
+
+        return ServiceResult(BalanceResponse(balance=member.balance))
 
     def deduct_balance(self, member_id: int, amount: float) -> ServiceResult:
         member = self.db.get(Member, member_id)
@@ -20,7 +22,8 @@ class BalanceService(AppService):
         member.balance -= amount
         self.db.commit()
         self.db.refresh(member)
-        return ServiceResult(member)
+
+        return ServiceResult(BalanceResponse(balance=member.balance))
 
     def add_balance(self, member_id: int, amount: float) -> ServiceResult:
         member = self.db.get(Member, member_id)
@@ -29,4 +32,5 @@ class BalanceService(AppService):
         member.balance += amount
         self.db.commit()
         self.db.refresh(member)
-        return ServiceResult(member)
+
+        return ServiceResult(BalanceResponse(balance=member.balance))

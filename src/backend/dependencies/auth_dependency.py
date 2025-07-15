@@ -7,10 +7,9 @@ from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
 
 from src.backend.core.app_dbsetting import DBSession
-from src.backend.core.app_settings import get_settings
+from src.backend.core.app_jwt import decode_access_token
 from src.backend.exceptions.cst_exception import AppException
 from src.backend.models.md_user import User as UserModel
 from src.backend.services.sr_user import UserCRUD
@@ -33,21 +32,21 @@ def get_current_user(db: DBSession, token: str = Depends(oauth2_scheme)) -> User
 
     Hasan Maki and Copilot
     """
-    settings = get_settings()
-    secret_key = settings.SECRET_KEY
-    algorithm = settings.ALGORITHM
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
     try:
-        payload = jwt.decode(token, secret_key, algorithms=[algorithm])
+        payload = decode_access_token(token)
         user_id: str | None = payload.get("sub")
         if user_id is None:
-            raise credentials_exception
-    except JWTError:
-        raise credentials_exception from None
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Could not validate credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    except AppException.InvalidTokenError as err:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        ) from err
 
     user = UserCRUD(db).get_by_id(int(user_id))
     if not user:
@@ -58,12 +57,27 @@ def get_current_user(db: DBSession, token: str = Depends(oauth2_scheme)) -> User
 CurrentUser = Annotated[UserModel, Depends(get_current_user)]
 
 
-def get_current_admin(db: DBSession, token: str = Depends(oauth2_scheme)) -> UserModel:
-    """Dependency untuk validasi admin (is_superuser)."""
-    user = get_current_user(db, token)
-    if not getattr(user, "is_superuser", False):
-        raise AppException.ForbiddenActionError("akses")
-    return user
+def require_admin(current_user: UserModel) -> UserModel:
+    """Dependency untuk validasi admin (is_superuser).
+
+    Hanya admin yang boleh akses. Raises HTTPException 403 jika bukan admin.
+    Hasan Maki and Copilot
+    """
+    if not getattr(current_user, "is_superuser", False):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin only")
+    return current_user
 
 
-CurrentAdmin = Annotated[UserModel, Depends(get_current_admin)]
+def require_owner_or_admin(member_id: int, current_user: UserModel) -> UserModel:
+    """Dependency untuk validasi owner atau admin.
+
+    Hanya admin atau owner (user.id == member_id) yang boleh akses.
+    Raises HTTPException 403 jika tidak memenuhi syarat.
+    Hasan Maki and Copilot
+    """
+    if not (
+        getattr(current_user, "is_superuser", False)
+        or getattr(current_user, "id", None) == member_id
+    ):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+    return current_user
