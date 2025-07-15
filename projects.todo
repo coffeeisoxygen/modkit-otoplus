@@ -1,2 +1,6 @@
 Todo:
   ☐ Item
+  ☐ Tambah endpoint GET /v1/members/status untuk validasi status member (mode allow_no_sign true/false)
+  ☐ Implementasi service validasi member: jika allow_no_sign true pakai name+pin+password, jika false pakai memberid+sign
+  ☐ Pastikan endpoint ini tidak butuh autentikasi admin, hanya validasi parameter dan status member
+  ☐ Jaga keamanan data sensitif dan batasi abuse endpoint ini (rate limit, dsb)
