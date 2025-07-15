@@ -1,3 +1,16 @@
+"""Modul service_result.py
+
+Modul ini berfungsi sebagai gerbang utama untuk menangani hasil operasi service di backend.
+
+- Kelas ServiceResult membungkus hasil operasi service, baik success maupun exception.
+- Fungsi handle_result digunakan untuk mengelola hasil tersebut, melempar exception jika gagal, atau mengembalikan value jika sukses.
+- Exception yang dilempar akan terstruktur dan dapat ditangani oleh handler FastAPI, sehingga frontend dapat menerima response error yang konsisten.
+
+Cocok digunakan untuk seluruh service layer pada aplikasi ini.
+
+Hasan Maki and Copilot
+"""
+
 import inspect
 from typing import Any
 
