@@ -4,9 +4,11 @@ This module defines the FastAPI routes for creating, retrieving, updating,
 and deleting users in the system.
 """
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from src.backend.core.app_dbsetting import DBSession
+from src.backend.dependencies.auth import get_current_user
+from src.backend.models.md_user import User as UserModel
 from src.backend.schemas.sc_user import UserCreate, UserRead, UserUpdate
 from src.backend.services.sr_user import UserService
 from src.backend.utils.result.service_result import handle_result
@@ -27,6 +29,16 @@ def create_user(data: UserCreate, db: DBSession):
     """
     result = UserService(db).create_user(data)
     return handle_result(result)
+
+
+@router.get("/me", response_model=UserRead)
+def read_current_user(current_user: UserModel = Depends(get_current_user)):
+    """Get the currently logged-in user (via token).
+
+    Returns:
+        UserRead: Information about the user from the JWT.
+    """
+    return current_user
 
 
 @router.get("/{user_id}", response_model=UserRead)
