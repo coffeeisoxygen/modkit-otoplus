@@ -1,62 +1,32 @@
-from contextlib import asynccontextmanager
-
 import uvicorn
-from fastapi import FastAPI, HTTPException
-from fastapi.exceptions import RequestValidationError
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import FastAPI
 
 from src._version import __version__ as version
-from src.backend.api.v1.auth import router as auth_router
-from src.backend.api.v1.member import router as member_router
-from src.backend.api.v1.user import router as user_router
-from src.backend.utils.exceptions.app_exceptions import AppExceptionError
-from src.backend.utils.exceptions.req_exception import (
-    app_exception_handler,
-    http_exception_handler,
-    request_validation_exception_handler,
-)
-from src.mlog.cst_logging import logger, patch_uvicorn_loggers, setup_logging
+from src.backend.core.app_exception import register_exception_handlers
+from src.backend.core.app_lifespan import lifespan
+from src.backend.core.app_logging import setup_app_logging
+from src.backend.core.app_router import register_routers
 
-# Load .env
-# load_dotenv()
-
-# Setup logging before anything else
-
-setup_logging()
-patch_uvicorn_loggers()
+# Setup logging
+setup_app_logging()
 version = version.split(" ")[0]
 
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):  # noqa: ARG001, RUF029
-    """Application lifespan events (startup/shutdown)."""
-    logger.info("Starting application...")
-    yield
-    logger.info("Shutting down application...")
-
-
+# FastAPI app
 app = FastAPI(
-    lifespan=lifespan,
     title="modkit-otoplus",
-    description="Menjembatani transaksi antara otomax dan addon addon otoplus.",
     version=version,
+    description="Menjembatani transaksi antara otomax dan addon addon otoplus.",
+    lifespan=lifespan,
 )
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
-app.include_router(member_router)
-app.include_router(user_router)
-app.include_router(auth_router)
 
-# Register the handler for FastAPI's HTTPException, not Starlette's
-app.add_exception_handler(HTTPException, http_exception_handler)
-app.add_exception_handler(RequestValidationError, request_validation_exception_handler)
-app.add_exception_handler(AppExceptionError, app_exception_handler)
+# Setup app
+register_routers(app)
+register_exception_handlers(app)
 
 
 @app.get("/")
-async def read_root():
-    """Root endpoint."""
-    logger.info("Hello endpoint accessed")
-    return {"message": "Hello World"}
+def root():
+    return {"message": "modkit-otoplus up & running"}
 
 
 if __name__ == "__main__":
