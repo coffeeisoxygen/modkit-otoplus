@@ -1,3 +1,5 @@
+from typing import Any
+
 from fastapi import APIRouter, Body
 
 from src.backend.core.app_dbsetting import DBSession
@@ -159,7 +161,7 @@ def get_member_balance(
     member_id: int,
     db: DBSession,
     current_user: CurrentUser,
-) -> BalanceResponse:
+) -> Any:  # changed from BalanceResponse to Any
     """Ambil saldo member berdasarkan ID.
 
     Args:
@@ -186,7 +188,7 @@ def add_member_balance(
     db: DBSession,
     current_user: CurrentUser,
     amount: float = Body(..., embed=True),
-) -> BalanceResponse:
+) -> Any:  # changed from BalanceResponse to Any
     """Tambah saldo member (hanya admin).
 
     Args:
@@ -214,7 +216,7 @@ def deduct_member_balance(
     db: DBSession,
     current_user: CurrentUser,
     amount: float = Body(..., embed=True),
-) -> BalanceResponse:
+) -> Any:  # changed from BalanceResponse to Any
     """Kurangi saldo member (hanya admin).
 
     Args:

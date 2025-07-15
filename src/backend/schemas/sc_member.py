@@ -100,6 +100,8 @@ class BalanceResponse(BaseModel):
     balance: float
 
     class Config:
+        """Config for BalanceResponse."""
+
         from_attributes = True
 
     """Response schema for member balance. Hasan Maki and Copilot"""
@@ -109,6 +111,8 @@ class BalanceUpdateRequest(BaseModel):
     amount: float
 
     class Config:
+        """config for BalanceUpdateRequest."""
+
         from_attributes = True
 
     """Request schema for updating member balance. Hasan Maki and Copilot"""
