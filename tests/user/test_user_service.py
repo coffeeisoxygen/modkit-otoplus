@@ -47,7 +47,7 @@ def test_get_user_not_found(db):
         service = UserService(db)
         result = service.get_user(999)
         assert not result.success
-        assert isinstance(result.value, AppException.UserNotFouncError)
+        assert isinstance(result.value, AppException.UserNotFoundError)
 
 
 def test_create_user_success(db, user_create, user):
@@ -90,7 +90,7 @@ def test_update_user_not_found(db, user_update, user):
         service = UserService(db)
         result = service.update_user(999, user_update, user)
         assert not result.success
-        assert isinstance(result.value, AppException.UserNotFouncError)
+        assert isinstance(result.value, AppException.UserNotFoundError)
 
 
 def test_delete_user_success(db, user):
@@ -109,4 +109,4 @@ def test_delete_user_not_found(db, user):
         service = UserService(db)
         result = service.delete_user(999, user)
         assert not result.success
-        assert isinstance(result.value, AppException.UserNotFouncError)
+        assert isinstance(result.value, AppException.UserNotFoundError)

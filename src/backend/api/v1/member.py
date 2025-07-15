@@ -3,7 +3,7 @@ from typing import Any
 from fastapi import APIRouter
 
 from src.backend.core.app_dbsetting import DBSession
-from src.backend.dependencies.user_auth import CurrentUser
+from src.backend.dependencies.auth_dependency import CurrentUser
 from src.backend.schemas.sc_member import MemberCreate, MemberRead, MemberUpdate
 from src.backend.services.service_result import handle_result
 from src.backend.services.sr_member import MemberService

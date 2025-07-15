@@ -36,3 +36,28 @@ def create_access_token(data: dict[str, Any], expires_delta: int = 30) -> str:
     if not secret_key or not algorithm:
         raise AppException.InvalidTokenError()
     return jwt.encode(to_encode, secret_key, algorithm=algorithm)
+
+
+def decode_access_token(token: str) -> dict[str, Any]:
+    """Decode JWT token dan kembalikan payload.
+
+    Args:
+        token (str): JWT token.
+
+    Returns:
+        dict[str, Any]: Payload token.
+
+    Raises:
+        AppException.InvalidTokenError: Jika token tidak valid/expired.
+
+    Hasan Maki and Copilot
+    """
+    settings = get_settings()
+    secret_key = settings.SECRET_KEY
+    algorithm = settings.ALGORITHM
+    try:
+        payload = jwt.decode(token, secret_key, algorithms=[algorithm])
+    except Exception as err:
+        raise AppException.InvalidTokenError() from err
+    else:
+        return payload

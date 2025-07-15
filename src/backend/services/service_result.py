@@ -1,4 +1,4 @@
-"""Modul service_result.py
+"""Modul service_result.py.
 
 Modul ini berfungsi sebagai gerbang utama untuk menangani hasil operasi service di backend.
 

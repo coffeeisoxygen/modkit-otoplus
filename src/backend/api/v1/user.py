@@ -7,7 +7,7 @@ All endpoints require authentication except for user creation.
 from fastapi import APIRouter
 
 from src.backend.core.app_dbsetting import DBSession
-from src.backend.dependencies.user_auth import CurrentUser
+from src.backend.dependencies.auth_dependency import CurrentUser
 from src.backend.schemas.sc_user import UserCreate, UserRead, UserUpdate
 from src.backend.services.service_result import handle_result
 from src.backend.services.sr_user import UserService

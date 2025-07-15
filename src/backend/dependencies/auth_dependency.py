@@ -18,7 +18,7 @@ from src.backend.services.sr_user import UserCRUD
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
-def get_current_user(db: DBSession, token: str = Depends(oauth2_scheme)):
+def get_current_user(db: DBSession, token: str = Depends(oauth2_scheme)) -> UserModel:
     """Ambil user dari JWT token.
 
     Args:
@@ -51,8 +51,19 @@ def get_current_user(db: DBSession, token: str = Depends(oauth2_scheme)):
 
     user = UserCRUD(db).get_by_id(int(user_id))
     if not user:
-        raise AppException.UserNotFouncError(int(user_id))
+        raise AppException.UserNotFoundError(int(user_id))
     return user
 
 
 CurrentUser = Annotated[UserModel, Depends(get_current_user)]
+
+
+def get_current_admin(db: DBSession, token: str = Depends(oauth2_scheme)) -> UserModel:
+    """Dependency untuk validasi admin (is_superuser)."""
+    user = get_current_user(db, token)
+    if not getattr(user, "is_superuser", False):
+        raise AppException.ForbiddenActionError("akses")
+    return user
+
+
+CurrentAdmin = Annotated[UserModel, Depends(get_current_admin)]

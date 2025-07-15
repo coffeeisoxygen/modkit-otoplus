@@ -49,7 +49,7 @@ class UserService(AppService):
     def get_user(self, user_id: int) -> ServiceResult:
         user = UserCRUD(self.db).get_by_id(user_id)
         if not user:
-            return ServiceResult(AppException.UserNotFouncError(user_id))
+            return ServiceResult(AppException.UserNotFoundError(user_id))
         return ServiceResult(user)
 
     def create_user(self, data: UserCreate) -> ServiceResult:
@@ -70,7 +70,7 @@ class UserService(AppService):
         crud = UserCRUD(self.db)
         user = crud.get_by_id(user_id)
         if not user:
-            return ServiceResult(AppException.UserNotFouncError(user_id))
+            return ServiceResult(AppException.UserNotFoundError(user_id))
         # ❗ Hanya admin atau diri sendiri
         if current_user.id != user_id and not current_user.is_superuser:
             return ServiceResult(
@@ -88,7 +88,7 @@ class UserService(AppService):
         crud = UserCRUD(self.db)
         user = crud.get_by_id(user_id)
         if not user:
-            return ServiceResult(AppException.UserNotFouncError(user_id))
+            return ServiceResult(AppException.UserNotFoundError(user_id))
         # ❗ Hanya admin atau diri sendiri
         if current_user.id != user_id and not current_user.is_superuser:
             return ServiceResult(
