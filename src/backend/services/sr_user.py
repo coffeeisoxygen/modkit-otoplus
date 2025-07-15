@@ -73,10 +73,14 @@ class UserService(AppService):
             return ServiceResult(AppException.UserNotFouncError(user_id))
         # ❗ Hanya admin atau diri sendiri
         if current_user.id != user_id and not current_user.is_superuser:
-            return ServiceResult(AppException.ForbiddenActionError("Hanya admin atau diri sendiri yang dapat mengubah data ini"))
-        # User biasa gak boleh update is_superuser
+            return ServiceResult(
+                AppException.ForbiddenActionError(
+                    "Hanya admin atau diri sendiri yang dapat mengubah data ini"
+                )
+            )
+        # User biasa tidak boleh update is_superuser
         if not current_user.is_superuser:
-            data.is_superuser = None  # abaikan input is_superuser
+            data.is_superuser = False  # pastikan is_superuser tidak None
         updated_user = crud.update(user, data)
         return ServiceResult(updated_user)
 
@@ -87,6 +91,10 @@ class UserService(AppService):
             return ServiceResult(AppException.UserNotFouncError(user_id))
         # ❗ Hanya admin atau diri sendiri
         if current_user.id != user_id and not current_user.is_superuser:
-            return ServiceResult(AppException.ForbiddenActionError("Hanya admin atau diri sendiri yang dapat menghapus data ini"))
+            return ServiceResult(
+                AppException.ForbiddenActionError(
+                    "Hanya admin atau diri sendiri yang dapat menghapus data ini"
+                )
+            )
         crud.delete(user)
         return ServiceResult({"deleted": True})

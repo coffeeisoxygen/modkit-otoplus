@@ -34,9 +34,7 @@ def user_update():
 
 
 def test_get_user_found(db, user):
-    with patch(
-        "src.backend.services.user_service.UserCRUD.get_by_id", return_value=user
-    ):
+    with patch("src.backend.services.sr_user.UserCRUD.get_by_id", return_value=user):
         service = UserService(db)
         result = service.get_user(user.id)
         assert isinstance(result, ServiceResult)
@@ -45,9 +43,7 @@ def test_get_user_found(db, user):
 
 
 def test_get_user_not_found(db):
-    with patch(
-        "src.backend.services.user_service.UserCRUD.get_by_id", return_value=None
-    ):
+    with patch("src.backend.services.sr_user.UserCRUD.get_by_id", return_value=None):
         service = UserService(db)
         result = service.get_user(999)
         assert not result.success
@@ -57,10 +53,10 @@ def test_get_user_not_found(db):
 def test_create_user_success(db, user_create, user):
     with (
         patch(
-            "src.backend.services.user_service.UserCRUD.get_by_username",
+            "src.backend.services.sr_user.UserCRUD.get_by_username",
             return_value=None,
         ),
-        patch("src.backend.services.user_service.UserCRUD.create", return_value=user),
+        patch("src.backend.services.sr_user.UserCRUD.create", return_value=user),
     ):
         service = UserService(db)
         result = service.create_user(user_create)
@@ -70,7 +66,7 @@ def test_create_user_success(db, user_create, user):
 
 def test_create_user_duplicate(db, user_create):
     with patch(
-        "src.backend.services.user_service.UserCRUD.get_by_username", return_value=True
+        "src.backend.services.sr_user.UserCRUD.get_by_username", return_value=True
     ):
         service = UserService(db)
         result = service.create_user(user_create)
@@ -80,45 +76,37 @@ def test_create_user_duplicate(db, user_create):
 
 def test_update_user_success(db, user, user_update):
     with (
-        patch(
-            "src.backend.services.user_service.UserCRUD.get_by_id", return_value=user
-        ),
-        patch("src.backend.services.user_service.UserCRUD.update", return_value=user),
+        patch("src.backend.services.sr_user.UserCRUD.get_by_id", return_value=user),
+        patch("src.backend.services.sr_user.UserCRUD.update", return_value=user),
     ):
         service = UserService(db)
-        result = service.update_user(user.id, user_update)
+        result = service.update_user(user.id, user_update, user)
         assert result.success
         assert result.value == user
 
 
-def test_update_user_not_found(db, user_update):
-    with patch(
-        "src.backend.services.user_service.UserCRUD.get_by_id", return_value=None
-    ):
+def test_update_user_not_found(db, user_update, user):
+    with patch("src.backend.services.sr_user.UserCRUD.get_by_id", return_value=None):
         service = UserService(db)
-        result = service.update_user(999, user_update)
+        result = service.update_user(999, user_update, user)
         assert not result.success
         assert isinstance(result.value, AppException.UserNotFouncError)
 
 
 def test_delete_user_success(db, user):
     with (
-        patch(
-            "src.backend.services.user_service.UserCRUD.get_by_id", return_value=user
-        ),
-        patch("src.backend.services.user_service.UserCRUD.delete", return_value=None),
+        patch("src.backend.services.sr_user.UserCRUD.get_by_id", return_value=user),
+        patch("src.backend.services.sr_user.UserCRUD.delete", return_value=None),
     ):
         service = UserService(db)
-        result = service.delete_user(user.id)
+        result = service.delete_user(user.id, user)
         assert result.success
         assert result.value == {"deleted": True}
 
 
-def test_delete_user_not_found(db):
-    with patch(
-        "src.backend.services.user_service.UserCRUD.get_by_id", return_value=None
-    ):
+def test_delete_user_not_found(db, user):
+    with patch("src.backend.services.sr_user.UserCRUD.get_by_id", return_value=None):
         service = UserService(db)
-        result = service.delete_user(999)
+        result = service.delete_user(999, user)
         assert not result.success
         assert isinstance(result.value, AppException.UserNotFouncError)
