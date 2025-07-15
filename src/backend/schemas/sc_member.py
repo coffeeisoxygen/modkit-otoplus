@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from src.backend.utils.validator.member_validator import (

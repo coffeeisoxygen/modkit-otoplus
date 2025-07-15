@@ -1,5 +1,6 @@
-from src.backend.utils.exceptions.app_exceptions import AppException
 import string
+
+from src.backend.utils.exceptions.app_exceptions import AppException
 
 
 def validate_alphanumeric_name(v: str) -> str:

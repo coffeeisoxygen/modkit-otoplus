@@ -1,7 +1,10 @@
 """module for user validation functions."""
 
 from src.backend.utils.exceptions.app_exceptions import AppException
-from src.backend.utils.validator.cmn_validator import validate_alphanumeric_name,validate_strength_password
+from src.backend.utils.validator.cmn_validator import (
+    validate_alphanumeric_name,
+    validate_strength_password,
+)
 
 
 def validate_username(v: str) -> str:
