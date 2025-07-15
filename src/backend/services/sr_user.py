@@ -64,37 +64,18 @@ class UserService(AppService):
         except SQLAlchemyError as e:
             return ServiceResult(AppException.DatabaseError(str(e)))
 
-    def update_user(
-        self, user_id: int, data: UserUpdate, current_user: User
-    ) -> ServiceResult:
+    def update_user(self, user_id: int, data: UserUpdate) -> ServiceResult:
         crud = UserCRUD(self.db)
         user = crud.get_by_id(user_id)
         if not user:
             return ServiceResult(AppException.UserNotFoundError(user_id))
-        # ❗ Hanya admin atau diri sendiri
-        if current_user.id != user_id and not current_user.is_superuser:
-            return ServiceResult(
-                AppException.ForbiddenActionError(
-                    "Hanya admin atau diri sendiri yang dapat mengubah data ini"
-                )
-            )
-        # User biasa tidak boleh update is_superuser
-        if not current_user.is_superuser:
-            data.is_superuser = False  # pastikan is_superuser tidak None
         updated_user = crud.update(user, data)
         return ServiceResult(updated_user)
 
-    def delete_user(self, user_id: int, current_user: User) -> ServiceResult:
+    def delete_user(self, user_id: int) -> ServiceResult:
         crud = UserCRUD(self.db)
         user = crud.get_by_id(user_id)
         if not user:
             return ServiceResult(AppException.UserNotFoundError(user_id))
-        # ❗ Hanya admin atau diri sendiri
-        if current_user.id != user_id and not current_user.is_superuser:
-            return ServiceResult(
-                AppException.ForbiddenActionError(
-                    "Hanya admin atau diri sendiri yang dapat menghapus data ini"
-                )
-            )
         crud.delete(user)
         return ServiceResult({"deleted": True})

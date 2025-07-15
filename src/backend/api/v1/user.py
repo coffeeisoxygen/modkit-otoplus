@@ -7,7 +7,7 @@ All endpoints require authentication except for user creation.
 from fastapi import APIRouter
 
 from src.backend.core.app_dbsetting import DBSession
-from src.backend.dependencies.auth_dependency import CurrentUser
+from src.backend.dependencies.auth_dependency import CurrentUser, require_owner_or_admin
 from src.backend.schemas.sc_user import UserCreate, UserRead, UserUpdate
 from src.backend.services.service_result import handle_result
 from src.backend.services.sr_user import UserService
@@ -61,7 +61,10 @@ def get_user(user_id: int, db: DBSession, _: CurrentUser):
 
 @router.put("/{user_id}", response_model=UserRead)
 def update_user(
-    user_id: int, data: UserUpdate, db: DBSession, current_user: CurrentUser
+    user_id: int,
+    data: UserUpdate,
+    db: DBSession,
+    current_user: CurrentUser,
 ):
     """Update an existing user's information.
 
@@ -74,7 +77,10 @@ def update_user(
     Returns:
         UserRead: The updated user's data.
     """
-    result = UserService(db).update_user(user_id, data, current_user)
+    # Hak akses: hanya admin atau diri sendiri
+
+    require_owner_or_admin(user_id, current_user)
+    result = UserService(db).update_user(user_id, data)
     return handle_result(result)
 
 
@@ -90,5 +96,8 @@ def delete_user(user_id: int, db: DBSession, current_user: CurrentUser):
     Returns:
         Any: The result of the delete operation.
     """
-    result = UserService(db).delete_user(user_id, current_user)
+    # Hak akses: hanya admin atau diri sendiri
+
+    require_owner_or_admin(user_id, current_user)
+    result = UserService(db).delete_user(user_id)
     return handle_result(result)

@@ -3,7 +3,11 @@ from typing import Any
 from fastapi import APIRouter, Body
 
 from src.backend.core.app_dbsetting import DBSession
-from src.backend.dependencies.auth_dependency import CurrentUser
+from src.backend.dependencies.auth_dependency import (
+    CurrentUser,
+    require_admin,
+    require_owner_or_admin,
+)
 from src.backend.schemas.sc_member import MemberCreate, MemberRead, MemberUpdate
 from src.backend.services.service_result import handle_result
 from src.backend.services.sr_balance import BalanceService
@@ -16,11 +20,23 @@ router = APIRouter(prefix="/v1/members", tags=["Members"])
 def list_members(
     db: DBSession,
     current_user: CurrentUser,
-    skip: int = 0,
-    limit: int = 100,
-) -> Any:
-    """List members with pagination. Hasan Maki and Copilot."""
-    result = MemberService(db).list_members(current_user, skip, limit)
+):
+    """List all members.
+
+    Parameters
+    ----------
+    db : DBSession
+        Database session.
+    current_user : CurrentUser
+        The current authenticated user.
+
+    Returns:
+    -------
+    list[MemberRead]
+        List of member objects.
+    """
+    require_admin(current_user)
+    result = MemberService(db).list_members(current_user)
     return handle_result(result)
 
 
@@ -29,8 +45,24 @@ def get_member_by_id(
     member_id: int,
     db: DBSession,
     current_user: CurrentUser,
-) -> Any:
-    """Get Member by ID. Hasan Maki and Copilot."""
+):
+    """Get a member by ID.
+
+    Parameters
+    ----------
+    member_id : int
+        The ID of the member.
+    db : DBSession
+        Database session.
+    current_user : CurrentUser
+        The current authenticated user.
+
+    Returns:
+    -------
+    MemberRead
+        The member object.
+    """
+    require_admin(current_user)
     result = MemberService(db).get_member(member_id, current_user)
     return handle_result(result)
 
@@ -40,8 +72,24 @@ def create_member(
     data: MemberCreate,
     db: DBSession,
     current_user: CurrentUser,
-) -> Any:
-    """Create a new member. Hasan Maki and Copilot."""
+):
+    """Create a new member.
+
+    Parameters
+    ----------
+    data : MemberCreate
+        Data for the new member.
+    db : DBSession
+        Database session.
+    current_user : CurrentUser
+        The current authenticated user.
+
+    Returns:
+    -------
+    MemberRead
+        The created member object.
+    """
+    require_admin(current_user)
     result = MemberService(db).create_member(data, current_user)
     return handle_result(result)
 
@@ -52,8 +100,26 @@ def update_member(
     data: MemberUpdate,
     db: DBSession,
     current_user: CurrentUser,
-) -> Any:
-    """Update an existing member by ID. Hasan Maki and Copilot."""
+):
+    """Update an existing member.
+
+    Parameters
+    ----------
+    member_id : int
+        The ID of the member to update.
+    data : MemberUpdate
+        Updated member data.
+    db : DBSession
+        Database session.
+    current_user : CurrentUser
+        The current authenticated user.
+
+    Returns:
+    -------
+    MemberRead
+        The updated member object.
+    """
+    require_admin(current_user)
     result = MemberService(db).update_member(member_id, data, current_user)
     return handle_result(result)
 
@@ -63,8 +129,24 @@ def delete_member(
     member_id: int,
     db: DBSession,
     current_user: CurrentUser,
-) -> Any:
-    """Delete a member by ID. Hasan Maki and Copilot."""
+):
+    """Delete a member by ID.
+
+    Parameters
+    ----------
+    member_id : int
+        The ID of the member to delete.
+    db : DBSession
+        Database session.
+    current_user : CurrentUser
+        The current authenticated user.
+
+    Returns:
+    -------
+    dict
+        Result of the deletion.
+    """
+    require_admin(current_user)
     result = MemberService(db).delete_member(member_id, current_user)
     return handle_result(result)
 
@@ -75,7 +157,23 @@ def get_member_balance(
     db: DBSession,
     current_user: CurrentUser,
 ) -> Any:
-    """Get member balance by ID. Hasan Maki and Copilot."""
+    """Get member balance by ID.
+
+    Parameters
+    ----------
+    member_id : int
+        The ID of the member.
+    db : DBSession
+        Database session.
+    current_user : CurrentUser
+        The current authenticated user.
+
+    Returns:
+    -------
+    dict
+        The member's balance.
+    """
+    require_owner_or_admin(member_id, current_user)
     result = BalanceService(db).get_balance(member_id)
     return handle_result(result)
 
@@ -84,10 +182,24 @@ def get_member_balance(
 def add_member_balance(
     member_id: int,
     db: DBSession,
-    current_user: CurrentUser,
     amount: float = Body(..., embed=True),
 ) -> Any:
-    """Add balance to member by ID. Hasan Maki and Copilot."""
+    """Add balance to member by ID.
+
+    Parameters
+    ----------
+    member_id : int
+        The ID of the member.
+    db : DBSession
+        Database session.
+    amount : float
+        Amount to add.
+
+    Returns:
+    -------
+    dict
+        Result of the balance addition.
+    """
     result = BalanceService(db).add_balance(member_id, amount)
     return handle_result(result)
 
@@ -96,9 +208,23 @@ def add_member_balance(
 def deduct_member_balance(
     member_id: int,
     db: DBSession,
-    current_user: CurrentUser,
     amount: float = Body(..., embed=True),
 ) -> Any:
-    """Deduct balance from member by ID. Hasan Maki and Copilot."""
+    """Deduct balance from member by ID.
+
+    Parameters
+    ----------
+    member_id : int
+        The ID of the member.
+    db : DBSession
+        Database session.
+    amount : float
+        Amount to deduct.
+
+    Returns:
+    -------
+    dict
+        Result of the balance deduction.
+    """
     result = BalanceService(db).deduct_balance(member_id, amount)
     return handle_result(result)
