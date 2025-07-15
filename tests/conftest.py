@@ -2,6 +2,7 @@ import uuid
 from unittest.mock import MagicMock
 
 import pytest
+from passlib.hash import bcrypt
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from src.backend.app import app
@@ -21,7 +22,24 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_db():
+    # Drop and recreate all tables
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
+    # Seed admin user
+    session = TestingSessionLocal()
+    try:
+        if not session.query(User).filter_by(username="Administrator").first():
+            admin = User(
+                username="Administrator",
+                email="admin@example.com",
+                password=bcrypt.hash("@Admin12345"),
+                is_active=True,
+                is_superuser=True,
+            )
+            session.add(admin)
+            session.commit()
+    finally:
+        session.close()
     yield
     Base.metadata.drop_all(bind=engine)
 
