@@ -5,7 +5,7 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from src.backend.app import app
-from src.backend.config.database import Base, get_session
+from src.backend.core.app_dbsetting import Base, get_session
 from src.backend.models.md_user import User
 from src.backend.schemas.sc_user import UserCreate, UserUpdate
 

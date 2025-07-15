@@ -8,7 +8,7 @@ from alembic import context
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 # Import engine & Base
-from src.backend.config.database import engine, Base
+from src.backend.core.app_dbsetting import engine, Base
 
 # Import semua model (pastikan semua file model di-import di sini)
 import src.backend.models  # noqa: F401

@@ -5,7 +5,7 @@ from datetime import datetime
 from sqlalchemy import Boolean, DateTime, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.backend.config.database import Base
+from src.backend.core.app_dbsetting import Base
 
 
 class User(Base):
