@@ -1,4 +1,4 @@
-from src.mlog.cst_logging import (
+from src.mlog.mylog import (
     LogContext,
     log_with_stacktrace,
     logger,

@@ -8,7 +8,7 @@ from src.backend.services.base import AppService
 from src.backend.services.service_result import ServiceResult
 from src.backend.exceptions.app_exceptions import AppException
 from src.backend.models.md_user import User
-from src.mlog.cst_logging import logger
+from src.mlog.mylog import logger
 
 
 class MemberCRUD:

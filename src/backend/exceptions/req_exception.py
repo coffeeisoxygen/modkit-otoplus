@@ -14,7 +14,7 @@ from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
 from src.backend.exceptions.app_exceptions import AppExceptionError
 from src.backend.services.service_result import caller_info
-from src.mlog.cst_logging import logger
+from src.mlog.mylog import logger
 
 
 async def http_exception_handler(request: Request, exc: Exception) -> JSONResponse:  # noqa: RUF029

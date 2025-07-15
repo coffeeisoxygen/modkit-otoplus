@@ -2,7 +2,7 @@ import inspect
 from typing import Any
 
 from src.backend.exceptions.app_exceptions import AppExceptionError
-from src.mlog.cst_logging import logger
+from src.mlog.mylog import logger
 
 
 class ServiceResult:

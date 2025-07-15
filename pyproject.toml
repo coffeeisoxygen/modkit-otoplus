@@ -131,6 +131,7 @@ omit = [
     "src/__init__.py",
     "src/_version.py",
     "*.pyi",
+    "src/mlog/mylog.py",
 ]
 
 [tool.coverage.report]
