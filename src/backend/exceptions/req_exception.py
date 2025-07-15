@@ -1,7 +1,12 @@
-"""Exception handlers for FastAPI application.
+"""Modul req_exception.py.
 
-Provides handlers for HTTPException, RequestValidationError, and custom
-AppExceptionError. Uses centralized logging from mlog.cst_logging.
+Modul ini berisi handler exception untuk aplikasi FastAPI.
+
+Tujuan utama modul ini adalah untuk didaftarkan (register) ke aplikasi FastAPI,
+sehingga semua error (HTTPException, RequestValidationError, dan custom AppExceptionError)
+bisa ditangani secara terpusat, konsisten, dan terstruktur.
+
+Handler di modul ini juga melakukan logging error terpusat, sehingga memudahkan debugging dan monitoring.
 
 Hasan Maki and Copilot
 """
@@ -17,7 +22,7 @@ from src.backend.services.service_result import caller_info
 from src.mlog.mylog import logger
 
 
-async def http_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+async def http_exception_handler(request: Request, exc: Exception) -> JSONResponse:  # noqa: ARG001, RUF029
     """Handle HTTP exceptions.
 
     Args:
@@ -35,8 +40,9 @@ async def http_exception_handler(request: Request, exc: Exception) -> JSONRespon
     raise exc
 
 
-async def request_validation_exception_handler(
-    request: Request, exc: Exception
+async def request_validation_exception_handler(  # noqa: RUF029
+    request: Request,  # noqa: ARG001
+    exc: Exception,
 ) -> JSONResponse:
     """Handle request validation exceptions.
 
@@ -58,7 +64,7 @@ async def request_validation_exception_handler(
     raise exc
 
 
-async def app_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+async def app_exception_handler(request: Request, exc: Exception) -> JSONResponse:  # noqa: ARG001, RUF029
     """Handle application exceptions.
 
     Args:
