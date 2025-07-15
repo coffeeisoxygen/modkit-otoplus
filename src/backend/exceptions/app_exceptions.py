@@ -153,3 +153,8 @@ class AppException:
 
         def __init__(self, action: str):
             super().__init__(403, {"message": f"Action '{action}' is forbidden"})
+    class MemberNotFoundError(AppExceptionError):
+        """Exception raised when a member is not found."""
+
+        def __init__(self, member_id: int):
+            super().__init__(404, {"message": f"Member ID {member_id} not found"})

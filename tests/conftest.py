@@ -6,7 +6,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from src.backend.app import app
 from src.backend.core.app_dbsetting import Base, get_session
+from src.backend.models.md_member import Member
 from src.backend.models.md_user import User
+from src.backend.schemas.sc_member import MemberCreate, MemberUpdate
 from src.backend.schemas.sc_user import UserCreate, UserUpdate
 
 # Use file-based SQLite for test reliability
@@ -87,3 +89,53 @@ def user():
 @pytest.fixture
 def db():
     return MagicMock()
+
+
+@pytest.fixture
+def member_create() -> MemberCreate:
+    unique = uuid.uuid4().hex[:8]
+    return MemberCreate(
+        name=f"member_{unique}",
+        ipaddress=f"192.168.1.{int(unique[:2], 16) % 255}",
+        urlreport="http://example.com/report",
+        pin="123456",
+        password="Abc123@",
+        is_active=True,
+        allow_no_sign=False,
+    )
+
+
+@pytest.fixture
+def member_update() -> MemberUpdate:
+    return MemberUpdate(urlreport="http://example.com/updated", is_active=False)
+
+
+@pytest.fixture
+def member(db_session) -> Member:
+    unique = uuid.uuid4().hex[:8]
+    member = Member(
+        name=f"member_{unique}",
+        ipaddress=f"192.168.1.{int(unique[:2], 16) % 255}",
+        urlreport="http://example.com/report",
+        pin="123456",
+        password="Abc123@",
+        is_active=True,
+        allow_no_sign=False,
+    )
+    db_session.add(member)
+    db_session.commit()
+    db_session.refresh(member)
+    return member
+
+
+@pytest.fixture
+def admin_user() -> User:
+    unique = uuid.uuid4().hex[:8]
+    return User(
+        id=999,
+        username=f"admin_{unique}",
+        email=f"admin_{unique}@example.com",
+        password="hashed",
+        is_active=True,
+        is_superuser=True,
+    )

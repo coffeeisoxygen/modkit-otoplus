@@ -1,175 +1,116 @@
 import json
-
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
 
-from src.backend.mcache.factory import CACHE_TTL, _cache_key, get_cache
-from src.backend.mcache.inmemory import InMemoryCacheBackend
 from src.backend.models.md_member import Member
-from src.backend.schemas.sc_member import MemberCreate, MemberRead, MemberUpdate
+from src.backend.schemas.sc_member import MemberCreate, MemberUpdate
+from src.backend.services.base import AppService
+from src.backend.services.service_result import ServiceResult
+from src.backend.exceptions.app_exceptions import AppException
+from src.backend.models.md_user import User
 from src.mlog.cst_logging import logger
 
-cache: InMemoryCacheBackend = get_cache()
 
+class MemberCRUD:
+    def __init__(self, db):
+        self.db = db
 
-def get_by_id(session: Session, member_id: int) -> MemberRead | None:
-    """Fetch a member by their ID.
+    def get_by_id(self, member_id: int) -> Member | None:
+        member = self.db.get(Member, member_id)
+        return member
 
-    This function first checks the cache for a member with the given ID.
-    If a cache hit occurs, the member is returned from the cache.
-    If not, the function queries the database for the member.
+    def get_by_ip(self, ip: str) -> Member | None:
+        member = self.db.execute(
+            select(Member).where(Member.ipaddress == ip)
+        ).scalar_one_or_none()
+        return member
 
-    Args:
-        session (Session): The database session.
-        member_id (int): The ID of the member to fetch.
+    def get_by_name(self, name: str) -> Member | None:
+        member = self.db.execute(
+            select(Member).where(Member.name == name)
+        ).scalar_one_or_none()
+        return member
 
-    Returns:
-        Member | None: The fetched member or None if not found.
-    """
-    logger.debug(f"Fetching member by id: {member_id}")
-    key = _cache_key("member", id=member_id)
-    cached_json = cache.get(key)
-    if cached_json:
-        logger.debug(f"Cache hit for member id: {member_id}")
-        return MemberRead.model_validate(json.loads(cached_json))
-    member = session.get(Member, member_id)
-    if member:
-        logger.debug(f"Member found in DB for id: {member_id}, caching result")
-        cache.set(key, member_to_json(member), ttl=CACHE_TTL)
-        return MemberRead.model_validate(member)
-    logger.debug(f"No member found in DB for id: {member_id}")
-    return None
+    def create(self, data: MemberCreate) -> Member:
+        member = Member(**data.model_dump())
+        self.db.add(member)
+        self.db.commit()
+        self.db.refresh(member)
+        logger.info(f"Member created with id: {member.id}")
+        return member
 
+    def update(self, member: Member, data: MemberUpdate) -> Member:
+        update_data = data.model_dump(exclude_unset=True)
+        for field, value in update_data.items():
+            setattr(member, field, value)
+        self.db.commit()
+        self.db.refresh(member)
+        logger.info(f"Member id: {member.id} updated successfully")
+        return member
 
-def get_by_ip(session: Session, ip: str) -> MemberRead | None:
-    """Fetch a member by their IP address.
-
-    This function first checks the cache for a member with the given IP address.
-    If a cache hit occurs, the member is returned from the cache.
-    If not, the function queries the database for the member.
-
-    Args:
-        session (Session): The database session.
-        ip (str): The IP address of the member to fetch.
-
-    Returns:
-        Member | None: The fetched member or None if not found.
-    """
-    logger.debug(f"Fetching member by ip: {ip}")
-    key = _cache_key("member", ip=ip)
-    cached_json = cache.get(key)
-    if cached_json:
-        logger.debug(f"Cache hit for member ip: {ip}")
-        return MemberRead.model_validate(json.loads(cached_json))
-    member = session.execute(
-        select(Member).where(Member.ipaddress == ip)
-    ).scalar_one_or_none()
-    if member:
-        logger.debug(f"Member found in DB for ip: {ip}, caching result")
-        cache.set(key, member_to_json(member), ttl=CACHE_TTL)
-        return MemberRead.model_validate(member)
-    logger.debug(f"No member found in DB for ip: {ip}")
-    return None
-
-
-def get_by_name(session: Session, name: str) -> MemberRead | None:
-    """Fetch a member by their name.
-
-    This function first checks the cache for a member with the given name.
-    If a cache hit occurs, the member is returned from the cache.
-    If not, the function queries the database for the member.
-
-    Args:
-        session (Session): The database session.
-        name (str): The name of the member to fetch.
-
-    Returns:
-        Member | None: The fetched member or None if not found.
-    """
-    logger.debug(f"Fetching member by name: {name}")
-    key = _cache_key("member", name=name)
-    cached_json = cache.get(key)
-    if cached_json:
-        logger.debug(f"Cache hit for member name: {name}")
-        return MemberRead.model_validate(json.loads(cached_json))
-    member = session.execute(
-        select(Member).where(Member.name == name)
-    ).scalar_one_or_none()
-    if member:
-        logger.debug(f"Member found in DB for name: {name}, caching result")
-        cache.set(key, member_to_json(member), ttl=CACHE_TTL)
-        return MemberRead.model_validate(member)
-    logger.debug(f"No member found in DB for name: {name}")
-    return None
-
-
-def create_member(session: Session, data: MemberCreate) -> MemberRead:
-    """Create a new member in the database."""
-    logger.info(f"Creating new member with data: {data}")
-    member = Member(**data.model_dump())
-    session.add(member)
-    session.commit()
-    session.refresh(member)
-    logger.info(f"Member created with id: {member.id}")
-    # Invalidate list cache if needed
-    return MemberRead.model_validate(member)
-
-
-def update_member(
-    session: Session, member_id: int, data: MemberUpdate
-) -> MemberRead | None:
-    """Get a member by their ID and update their information."""
-    logger.info(f"Updating member id: {member_id} with data: {data}")
-    member = session.get(Member, member_id)
-    if not member:
-        logger.warning(f"Member id: {member_id} not found for update")
+    def delete(self, member: Member) -> None:
+        self.db.delete(member)
+        self.db.commit()
+        logger.info(f"Member id: {member.id} deleted successfully")
         return None
-    for field, value in data.model_dump(exclude_unset=True).items():
-        setattr(member, field, value)
-    session.commit()
-    session.refresh(member)
-    # Clear cache
-    logger.debug(f"Clearing cache for updated member id: {member_id}")
-    cache.delete(_cache_key("member", id=member_id))
-    cache.delete(_cache_key("member", ip=member.ipaddress))
-    cache.delete(_cache_key("member", name=member.name))
-    logger.info(f"Member id: {member_id} updated successfully")
-    return MemberRead.model_validate(member)
+
+    def list(self, skip: int = 0, limit: int = 100) -> list[Member]:
+        members = self.db.execute(select(Member).offset(skip).limit(limit)).scalars().all()
+        return list(members)
 
 
-def delete_member(session: Session, member_id: int) -> bool:
-    """Delete a member by their ID."""
-    logger.info(f"Deleting member id: {member_id}")
-    member = session.get(Member, member_id)
-    if not member:
-        logger.warning(f"Member id: {member_id} not found for deletion")
-        return False
-    session.delete(member)
-    session.commit()
-    # Clear cache
-    logger.debug(f"Clearing cache for deleted member id: {member_id}")
-    cache.delete(_cache_key("member", id=member_id))
-    cache.delete(_cache_key("member", ip=member.ipaddress))
-    cache.delete(_cache_key("member", name=member.name))
-    logger.info(f"Member id: {member_id} deleted successfully")
-    return True
+class MemberService(AppService):
+    def _check_superuser(self, current_user: User) -> ServiceResult | None:
+        if not getattr(current_user, "is_superuser", False):
+            return ServiceResult(
+                AppException.ForbiddenActionError(
+                    "Hanya admin (is_superuser) yang dapat mengelola member"
+                )
+            )
+        return None
 
+    def get_member(self, member_id: int, current_user: User) -> ServiceResult:
+        if (result := self._check_superuser(current_user)) is not None:
+            return result
+        member = MemberCRUD(self.db).get_by_id(member_id)
+        if not member:
+            return ServiceResult(AppException.MemberNotFoundError(member_id))
+        return ServiceResult(member)
 
-def list_members(session: Session, skip: int = 0, limit: int = 100) -> list[MemberRead]:
-    """List members with pagination and caching."""
-    logger.debug(f"Listing members with skip: {skip}, limit: {limit}")
-    key = _cache_key("members:list", skip=skip, limit=limit)
-    cached_json = cache.get(key)
-    if cached_json:
-        logger.debug("Cache hit for member list")
-        return [MemberRead.model_validate(m) for m in json.loads(cached_json)]
-    members = session.execute(select(Member).offset(skip).limit(limit)).scalars().all()
-    if members:
-        logger.debug(f"Members found in DB, caching result with count: {len(members)}")
-        cache.set(key, json.dumps([member_to_dict(m) for m in members]), ttl=CACHE_TTL)
-    else:
-        logger.debug("No members found in DB for listing")
-    return [MemberRead.model_validate(m) for m in members]
+    def create_member(self, data: MemberCreate, current_user: User) -> ServiceResult:
+        if (result := self._check_superuser(current_user)) is not None:
+            return result
+        try:
+            member = MemberCRUD(self.db).create(data)
+            return ServiceResult(member)
+        except SQLAlchemyError as e:
+            return ServiceResult(AppException.DatabaseError(str(e)))
+
+    def update_member(self, member_id: int, data: MemberUpdate, current_user: User) -> ServiceResult:
+        if (result := self._check_superuser(current_user)) is not None:
+            return result
+        crud = MemberCRUD(self.db)
+        member = crud.get_by_id(member_id)
+        if not member:
+            return ServiceResult(AppException.MemberNotFoundError(member_id))
+        updated_member = crud.update(member, data)
+        return ServiceResult(updated_member)
+
+    def delete_member(self, member_id: int, current_user: User) -> ServiceResult:
+        if (result := self._check_superuser(current_user)) is not None:
+            return result
+        crud = MemberCRUD(self.db)
+        member = crud.get_by_id(member_id)
+        if not member:
+            return ServiceResult(AppException.MemberNotFoundError(member_id))
+        crud.delete(member)
+        return ServiceResult({"deleted": True})
+
+    def list_members(self, current_user: User, skip: int = 0, limit: int = 100) -> ServiceResult:
+        if (result := self._check_superuser(current_user)) is not None:
+            return result
+        members = MemberCRUD(self.db).list(skip=skip, limit=limit)
+        return ServiceResult(members)
 
 
 # Helper for serialization
@@ -178,7 +119,6 @@ def member_to_json(member: Member) -> str:
 
 
 def member_to_dict(member: Member) -> dict:
-    # Convert SQLAlchemy model to dict for caching
     return {
         "id": member.id,
         "name": member.name,
@@ -187,7 +127,6 @@ def member_to_dict(member: Member) -> dict:
         "pin": member.pin,
         "password": member.password,
         "is_active": member.is_active,
-        "created_at": member.created_at.isoformat()
-        if getattr(member, "created_at", None) is not None
-        else None,
+        "allow_no_sign": member.allow_no_sign,
+        "created_at": member.created_at.isoformat() if getattr(member, "created_at", None) is not None else None,
     }
