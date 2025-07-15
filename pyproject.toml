@@ -10,7 +10,6 @@ dependencies = [
     "loguru>=0.7.3",
     "passlib[bcrypt]>=1.7.4",
     "python-jose>=3.5.0",
-    "streamlit>=1.46.1",
 ]
 
 

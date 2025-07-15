@@ -3,7 +3,7 @@ import json
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 
-from src.backend.exceptions.app_exceptions import AppException
+from src.backend.exceptions.cst_exception import AppException
 from src.backend.models.md_member import Member
 from src.backend.models.md_user import User
 from src.backend.schemas.sc_member import MemberCreate, MemberUpdate

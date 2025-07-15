@@ -11,7 +11,7 @@ from jose import JWTError, jwt
 
 from src.backend.core.app_dbsetting import DBSession
 from src.backend.core.app_settings import get_settings
-from src.backend.exceptions.app_exceptions import AppException
+from src.backend.exceptions.cst_exception import AppException
 from src.backend.models.md_user import User as UserModel
 from src.backend.services.sr_user import UserCRUD
 

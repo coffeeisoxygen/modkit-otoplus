@@ -1,7 +1,7 @@
 from sqlalchemy.exc import SQLAlchemyError
 
 from src.backend.core.app_jwt import create_access_token
-from src.backend.exceptions.app_exceptions import AppException
+from src.backend.exceptions.cst_exception import AppException
 from src.backend.services.base import AppService
 from src.backend.services.service_result import ServiceResult
 from src.backend.services.sr_user import UserCRUD

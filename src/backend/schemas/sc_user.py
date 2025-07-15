@@ -11,7 +11,7 @@ from pydantic import (
     model_validator,
 )
 
-from src.backend.exceptions import app_exceptions
+from src.backend.exceptions import cst_exception
 from src.backend.utils.validator.user_validator import (
     validate_password,
     validate_username,
@@ -48,7 +48,7 @@ class UserCreate(UserBase):
     @model_validator(mode="after")
     def check_passwords_match(self) -> "UserCreate":
         if self.password != self.password_confirm:
-            raise app_exceptions.AppException.PasswordConfirmValidationError()
+            raise cst_exception.AppException.PasswordConfirmValidationError()
         return self
 
 

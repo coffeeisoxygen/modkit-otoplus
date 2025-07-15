@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-from src.backend.exceptions.app_exceptions import AppException
+from src.backend.exceptions.cst_exception import AppException
 from src.backend.models.md_user import User
 from src.backend.schemas.sc_user import UserCreate, UserUpdate
 from src.backend.services.service_result import ServiceResult

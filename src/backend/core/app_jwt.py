@@ -9,7 +9,7 @@ from typing import Any
 from jose import jwt
 
 from src.backend.core.app_settings import get_settings
-from src.backend.exceptions.app_exceptions import AppException
+from src.backend.exceptions.cst_exception import AppException
 
 
 def create_access_token(data: dict[str, Any], expires_delta: int = 30) -> str:
