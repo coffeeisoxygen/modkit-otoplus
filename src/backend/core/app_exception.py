@@ -1,8 +1,8 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 
-from src.backend.utils.app_exceptions import AppExceptionError
-from src.backend.utils.req_exception import (
+from src.backend.exceptions.app_exceptions import AppExceptionError
+from src.backend.exceptions.req_exception import (
     app_exception_handler,
     http_exception_handler,
     request_validation_exception_handler,

@@ -11,7 +11,7 @@ from pydantic import (
     model_validator,
 )
 
-from src.backend.utils import app_exceptions
+from src.backend.exceptions import app_exceptions
 from src.backend.utils.validator.user_validator import (
     validate_password,
     validate_username,

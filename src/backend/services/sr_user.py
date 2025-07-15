@@ -3,8 +3,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from src.backend.models.md_user import User
 from src.backend.schemas.sc_user import UserCreate, UserUpdate
 from src.backend.services.base import AppCRUD, AppService
-from src.backend.utils.app_exceptions import AppException
-from src.backend.utils.service_result import ServiceResult
+from src.backend.exceptions.app_exceptions import AppException
+from src.backend.services.service_result import ServiceResult
 from src.backend.utils.security import hash_password
 
 

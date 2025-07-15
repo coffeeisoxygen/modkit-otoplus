@@ -12,8 +12,8 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
-from src.backend.utils.app_exceptions import AppExceptionError
-from src.backend.utils.service_result import caller_info
+from src.backend.exceptions.app_exceptions import AppExceptionError
+from src.backend.services.service_result import caller_info
 from src.mlog.cst_logging import logger
 
 
