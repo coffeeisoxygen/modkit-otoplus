@@ -14,10 +14,7 @@ def run_backend():
 
 
 def run_frontend():
-    import streamlit.web.cli as stcli
-
-    sys.argv = ["streamlit", "run", "src/frontend/app.py"]
-    sys.exit(stcli.main())
+    pass
 
 
 if __name__ == "__main__":
