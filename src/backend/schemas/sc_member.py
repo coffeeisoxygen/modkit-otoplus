@@ -20,10 +20,7 @@ class MemberBase(BaseModel):
     is_active: bool = True
     allow_no_sign: bool = False
 
-    model_config = ConfigDict(
-        str_strip_whitespace=True,
-        from_attributes=True
-    )
+    model_config = ConfigDict(str_strip_whitespace=True, from_attributes=True)
 
     @field_validator("name")
     @classmethod
@@ -64,9 +61,7 @@ class MemberUpdate(BaseModel):
     is_active: bool | None = None
     allow_no_sign: bool | None = None
 
-    model_config = ConfigDict(
-        str_strip_whitespace=True
-    )
+    model_config = ConfigDict(str_strip_whitespace=True)
 
     @field_validator("name")
     @classmethod

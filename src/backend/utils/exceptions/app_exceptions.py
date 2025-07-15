@@ -118,6 +118,12 @@ class AppException:
         def __init__(self, user_id: int):
             super().__init__(422, {"message": f"User ID {user_id} not found"})
 
+    class UserNameNotFoundError(AppExceptionError):
+        """Exception raised when a username is not found."""
+
+        def __init__(self, username: str):
+            super().__init__(422, {"message": f"Username '{username}' not found"})
+
     class UsernameAlreadyExistsError(AppExceptionError):
         """Exception raised when a username already exists."""
 
@@ -129,3 +135,15 @@ class AppException:
 
         def __init__(self, error: str):
             super().__init__(500, {"message": "Database error", "detail": error})
+
+    class InvalidCredentialsError(AppExceptionError):
+        """Exception raised for invalid credentials."""
+
+        def __init__(self):
+            super().__init__(401, {"message": "Invalid username or password"})
+
+    class InvalidTokenError(AppExceptionError):
+        """Exception raised for invalid tokens."""
+
+        def __init__(self):
+            super().__init__(401, {"message": "Invalid or expired token"})

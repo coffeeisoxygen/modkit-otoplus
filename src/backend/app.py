@@ -1,13 +1,12 @@
 from contextlib import asynccontextmanager
 
 import uvicorn
-from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.security import OAuth2PasswordBearer
 
-from mlog.cst_logging import logger, patch_uvicorn_loggers, setup_logging
 from src._version import __version__ as version
+from src.backend.api.v1.auth import router as auth_router
 from src.backend.api.v1.member import router as member_router
 from src.backend.api.v1.user import router as user_router
 from src.backend.utils.exceptions.app_exceptions import AppExceptionError
@@ -16,11 +15,13 @@ from src.backend.utils.exceptions.req_exception import (
     http_exception_handler,
     request_validation_exception_handler,
 )
+from src.mlog.cst_logging import logger, patch_uvicorn_loggers, setup_logging
 
 # Load .env
-load_dotenv()
+# load_dotenv()
 
 # Setup logging before anything else
+
 setup_logging()
 patch_uvicorn_loggers()
 version = version.split(" ")[0]
@@ -40,10 +41,10 @@ app = FastAPI(
     description="Menjembatani transaksi antara otomax dan addon addon otoplus.",
     version=version,
 )
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 app.include_router(member_router)
 app.include_router(user_router)
-
+app.include_router(auth_router)
 
 # Register the handler for FastAPI's HTTPException, not Starlette's
 app.add_exception_handler(HTTPException, http_exception_handler)

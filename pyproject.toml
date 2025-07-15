@@ -9,6 +9,7 @@ dependencies = [
     "fastapi[all]>=0.116.1",
     "loguru>=0.7.3",
     "passlib[bcrypt]>=1.7.4",
+    "python-jose>=3.5.0",
     "streamlit>=1.46.1",
 ]
 
@@ -113,7 +114,6 @@ quote-style = "double"
 indent-style = "space"
 docstring-code-format = true
 docstring-code-line-length = 60
-skip-magic-trailing-comma = true
 
 [tool.coverage.run]
 source = ["src"]

@@ -8,7 +8,7 @@ from fastapi import APIRouter
 
 from src.backend.config.database import DBSession
 from src.backend.schemas.sc_user import UserCreate, UserRead, UserUpdate
-from src.backend.services.user_service import UserService
+from src.backend.services.sr_user import UserService
 from src.backend.utils.result.service_result import handle_result
 
 router = APIRouter(prefix="/users", tags=["Users"])
