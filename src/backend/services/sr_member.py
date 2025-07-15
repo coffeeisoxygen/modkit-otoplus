@@ -116,10 +116,22 @@ class MemberService(AppService):
 
 # Helper for serialization
 def member_to_json(member: Member) -> str:
+    """Convert a Member object to a JSON string.
+
+    This function serializes the Member object, including all its fields,
+    into a JSON-formatted string.
+
+    Args:
+        member (Member): The Member object to serialize.
+
+    Returns:
+        str: A JSON-formatted string representing the Member object.
+    """
     return json.dumps(member_to_dict(member))
 
 
 def member_to_dict(member: Member) -> dict:
+    """Convert a Member object to a dictionary."""
     return {
         "id": member.id,
         "name": member.name,
