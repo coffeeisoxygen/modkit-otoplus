@@ -1,11 +1,11 @@
 from sqlalchemy.exc import SQLAlchemyError
 
 from src.backend.core.app_settings import get_settings
+from src.backend.exceptions.app_exceptions import AppException
 from src.backend.schemas.sc_user import UserCreate
 from src.backend.services.base import AppService
-from src.backend.services.sr_user import UserCRUD
-from src.backend.exceptions.app_exceptions import AppException
 from src.backend.services.service_result import ServiceResult
+from src.backend.services.sr_user import UserCRUD
 
 
 class AdminSeeder(AppService):

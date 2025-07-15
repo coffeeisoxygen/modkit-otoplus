@@ -33,8 +33,30 @@ def unique_member_payload() -> dict:
     }
 
 
+def ensure_admin_user():
+    # Try to login, if fails, create the admin user
+    resp = client.post(
+        "/auth/login",
+        data={"username": "Administrator", "password": "@Admin12345"},
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+    )
+    if resp.status_code == 200:
+        return
+    # Try to create admin user
+    admin_payload = {
+        "username": "Administrator",
+        "email": "admin@example.com",
+        "password": "@Admin12345",
+        "is_admin": True,
+        "is_active": True,
+        "full_name": "Administrator",
+    }
+    # Try to create, ignore if already exists
+    client.post("/users/", json=admin_payload)
+
+
 def test_create_member_admin_success():
-    # Login sebagai admin dari .env
+    ensure_admin_user()
     token = get_auth_token("Administrator", "@Admin12345")
     member_payload = unique_member_payload()
     response = client.post(
@@ -62,6 +84,7 @@ def test_create_member_forbidden_for_non_admin(user_payload):
 
 
 def test_get_member_admin_success(user_payload):
+    ensure_admin_user()
     token = get_auth_token("Administrator", "@Admin12345")
     member_payload = unique_member_payload()
     create_resp = client.post(
@@ -106,6 +129,7 @@ def test_get_member_forbidden_for_non_admin(user_payload):
 
 
 def test_update_member_admin_success(user_payload):
+    ensure_admin_user()
     token = get_auth_token("Administrator", "@Admin12345")
     member_payload = unique_member_payload()
     create_resp = client.post(
@@ -157,6 +181,7 @@ def test_update_member_forbidden_for_non_admin(user_payload):
 
 
 def test_delete_member_admin_success(user_payload):
+    ensure_admin_user()
     token = get_auth_token("Administrator", "@Admin12345")
     member_payload = unique_member_payload()
     create_resp = client.post(
@@ -201,6 +226,7 @@ def test_delete_member_forbidden_for_non_admin(user_payload):
 
 
 def test_list_members_admin_success(user_payload):
+    ensure_admin_user()
     token = get_auth_token("Administrator", "@Admin12345")
     member_payload = unique_member_payload()
     client.post(

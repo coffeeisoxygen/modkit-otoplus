@@ -17,7 +17,7 @@ from src.backend.services.service_result import caller_info
 from src.mlog.mylog import logger
 
 
-async def http_exception_handler(request: Request, exc: Exception) -> JSONResponse:  # noqa: RUF029
+async def http_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Handle HTTP exceptions.
 
     Args:

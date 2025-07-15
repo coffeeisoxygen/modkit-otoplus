@@ -9,8 +9,8 @@ from fastapi import APIRouter
 from src.backend.core.app_dbsetting import DBSession
 from src.backend.dependencies.user_auth import CurrentUser
 from src.backend.schemas.sc_user import UserCreate, UserRead, UserUpdate
-from src.backend.services.sr_user import UserService
 from src.backend.services.service_result import handle_result
+from src.backend.services.sr_user import UserService
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -60,7 +60,9 @@ def get_user(user_id: int, db: DBSession, _: CurrentUser):
 
 
 @router.put("/{user_id}", response_model=UserRead)
-def update_user(user_id: int, data: UserUpdate, db: DBSession, current_user: CurrentUser):
+def update_user(
+    user_id: int, data: UserUpdate, db: DBSession, current_user: CurrentUser
+):
     """Update an existing user's information.
 
     Args:

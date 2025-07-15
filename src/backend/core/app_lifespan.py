@@ -9,7 +9,7 @@ from src.mlog.mylog import logger
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):  # noqa: ARG001, D103, RUF029
+async def lifespan(app: FastAPI):  # noqa: ARG001, D103
     db = next(get_session())
     AdminSeeder(db).seed_admin()
     logger.info("🟢 Starting application...")

@@ -1,13 +1,14 @@
 import json
+
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 
+from src.backend.exceptions.app_exceptions import AppException
 from src.backend.models.md_member import Member
+from src.backend.models.md_user import User
 from src.backend.schemas.sc_member import MemberCreate, MemberUpdate
 from src.backend.services.base import AppService
 from src.backend.services.service_result import ServiceResult
-from src.backend.exceptions.app_exceptions import AppException
-from src.backend.models.md_user import User
 from src.mlog.mylog import logger
 
 
@@ -55,7 +56,9 @@ class MemberCRUD:
         return None
 
     def list(self, skip: int = 0, limit: int = 100) -> list[Member]:
-        members = self.db.execute(select(Member).offset(skip).limit(limit)).scalars().all()
+        members = (
+            self.db.execute(select(Member).offset(skip).limit(limit)).scalars().all()
+        )
         return list(members)
 
 
@@ -86,7 +89,9 @@ class MemberService(AppService):
         except SQLAlchemyError as e:
             return ServiceResult(AppException.DatabaseError(str(e)))
 
-    def update_member(self, member_id: int, data: MemberUpdate, current_user: User) -> ServiceResult:
+    def update_member(
+        self, member_id: int, data: MemberUpdate, current_user: User
+    ) -> ServiceResult:
         if (result := self._check_superuser(current_user)) is not None:
             return result
         crud = MemberCRUD(self.db)
@@ -106,7 +111,9 @@ class MemberService(AppService):
         crud.delete(member)
         return ServiceResult({"deleted": True})
 
-    def list_members(self, current_user: User, skip: int = 0, limit: int = 100) -> ServiceResult:
+    def list_members(
+        self, current_user: User, skip: int = 0, limit: int = 100
+    ) -> ServiceResult:
         if (result := self._check_superuser(current_user)) is not None:
             return result
         members = MemberCRUD(self.db).list(skip=skip, limit=limit)
@@ -128,5 +135,7 @@ def member_to_dict(member: Member) -> dict:
         "password": member.password,
         "is_active": member.is_active,
         "allow_no_sign": member.allow_no_sign,
-        "created_at": member.created_at.isoformat() if getattr(member, "created_at", None) is not None else None,
+        "created_at": member.created_at.isoformat()
+        if getattr(member, "created_at", None) is not None
+        else None,
     }
