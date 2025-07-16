@@ -25,7 +25,7 @@ version = version.split(" ")[0]
 app = FastAPI(
     title="modkit-otoplus",
     version=version,
-    description="Menjembatani transaksi antara otomax dan addon addon otoplus.",
+    description="Localhost untuk menjembatani antara otomax dan addon addon otoplus,transaksi ke addon akan di parse dan di restruktur sebelum akhir nya di kembalikan ke otomax",
     lifespan=lifespan,
 )
 
