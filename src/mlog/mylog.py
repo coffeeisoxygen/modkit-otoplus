@@ -47,11 +47,11 @@ LOG_SERIALIZE = config.get("serialize", False)
 LOG_ENQUEUE = config.get("enqueue", True)
 LOG_TO_FILE = config.get("to_file", True)
 LOG_PATH = config.get("log_path", "logs")
-LOG_NAME_PREFIX = config.get("name_prefix", "app")
+LOG_NAME_PREFIX = config.get("name_prefix", "modkit")
 LOG_SIZE_MB = int(config.get("size_mb", 10)) * 1_000_000
 LOG_RETENTION = f"{config.get('retention_days', 7)} days"
 LOG_SHOW_THREAD = config.get("show_thread", False)
-LOG_SHOW_TIME = config.get("show_time", True)
+LOG_SHOW_TIME = config.get("show_time", False)
 LOG_SHOW_PROCESS = config.get("show_process", False)
 
 
